@@ -1,0 +1,399 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════
+   Material Theme — Seed #115E59 (Teal)
+   Generated via Material Theme Builder
+   Mapped to semantic CSS custom properties
+   ═══════════════════════════════════════════════════════ */
+
+:root,
+[data-theme="light"] {
+  /* --- M3 Reference Palette (constant) --- */
+  --m3-primary-10: #00201E;
+  --m3-primary-20: #003734;
+  --m3-primary-30: #00504B;
+  --m3-primary-40: #216963;
+  --m3-primary-50: #3E827C;
+  --m3-primary-80: #8FD3CC;
+  --m3-primary-90: #ABEFE8;
+  --m3-secondary-30: #3C4948;
+  --m3-secondary-90: #D6E6E3;
+  --m3-tertiary-30: #3B4857;
+  --m3-tertiary-40: #52606F;
+  --m3-tertiary-90: #D6E4F6;
+
+  /* --- Backgrounds (M3 surface containers) --- */
+  --bg-app: #F4FBF9;                  /* surface */
+  --bg-surface: #FFFFFF;              /* surfaceContainerLowest */
+  --bg-elevated: #EFF5F3;             /* surfaceContainerLow */
+  --bg-hover: #E3E9E8;               /* surfaceContainerHigh */
+
+  /* --- Text --- */
+  --text-main: #161D1C;              /* onSurface */
+  --text-muted: #3F4947;             /* onSurfaceVariant */
+  --text-subtle: #6F7977;            /* outline */
+
+  /* --- Borders & Dividers --- */
+  --border-light: #DAE5E2;           /* surfaceVariant */
+  --border-primary: #BEC9C7;         /* outlineVariant */
+
+  /* --- Interactive / Primary --- */
+  --action-primary: #006A64;         /* primary */
+  --action-primary-rgb: 0, 106, 100;
+  --action-hover: #00504B;           /* onPrimaryContainer / primary-30 */
+  --action-disabled: #BEC9C7;        /* outlineVariant */
+  --on-primary: #FFFFFF;             /* onPrimary */
+  --primary-container: #9DF2E9;      /* primaryContainer */
+  --on-primary-container: #00504B;   /* onPrimaryContainer */
+
+  /* --- Interactive / Accent (tertiary) --- */
+  --cta-accent: #48617B;             /* tertiary */
+  --cta-accent-hover: #304962;       /* onTertiaryContainer */
+  --on-accent: #FFFFFF;              /* onTertiary */
+  --accent-container: #CFE5FF;       /* tertiaryContainer */
+
+  /* --- Interactive / Secondary --- */
+  --secondary: #4A6360;              /* secondary */
+  --on-secondary: #FFFFFF;           /* onSecondary */
+  --secondary-container: #CCE8E4;    /* secondaryContainer */
+  --on-secondary-container: #324B49; /* onSecondaryContainer */
+
+  /* --- Semantic --- */
+  --color-success: #006A64;          /* reuse primary for success in teal theme */
+  --color-success-bg: #9DF2E9;       /* primaryContainer */
+  --color-warning: #7D5700;          /* custom warm amber */
+  --color-warning-bg: #FFDEA6;       /* custom warm amber container */
+  --color-error: #BA1A1A;            /* error */
+  --color-error-bg: #FFDAD6;         /* errorContainer */
+  --on-error: #FFFFFF;               /* onError */
+  --color-info: #48617B;             /* tertiary */
+  --color-info-bg: #CFE5FF;          /* tertiaryContainer */
+
+  /* --- Sidebar (M3 inverseSurface family) --- */
+  --sidebar-bg: #2B3231;             /* inverseSurface */
+  --sidebar-active: #006A64;         /* primary — pops against dark sidebar */
+  --sidebar-border: #3F4947;         /* onSurfaceVariant as dark border */
+  --sidebar-text: #ECF2F0;           /* inverseOnSurface */
+  --sidebar-text-muted: rgba(236, 242, 240, 0.6);
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+
+  /* --- Finance Module (uses tertiary tones) --- */
+  --finance-bg: #F7F9FF;             /* tertiary-98 */
+  --finance-surface: #FFFFFF;
+  --finance-header: #304962;         /* onTertiaryContainer */
+  --finance-accent: #48617B;         /* tertiary */
+  --finance-text: #304962;
+
+  /* --- Spacing & Layout --- */
+  --touch-target: 44px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* --- Shadows --- */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-card-hover: 0 8px 24px rgba(0, 106, 100, 0.12);
+
+  /* --- Typography --- */
+  --font-display: 'Plus Jakarta Sans', 'Noto Sans', system-ui, sans-serif;
+  --font-body: 'Inter', 'Noto Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DARK MODE — M3 Dark scheme
+   ═══════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  /* --- M3 Reference Palette (constant) --- */
+  --m3-primary-10: #00201E;
+  --m3-primary-20: #003734;
+  --m3-primary-30: #00504B;
+  --m3-primary-40: #216963;
+  --m3-primary-50: #3E827C;
+  --m3-primary-80: #8FD3CC;
+  --m3-primary-90: #ABEFE8;
+  --m3-secondary-30: #3C4948;
+  --m3-secondary-90: #D6E6E3;
+  --m3-tertiary-30: #3B4857;
+  --m3-tertiary-40: #52606F;
+  --m3-tertiary-90: #D6E4F6;
+
+  /* --- Backgrounds (M3 dark surface containers) --- */
+  --bg-app: #0E1514;                  /* surface */
+  --bg-surface: #161D1C;              /* surfaceContainerLow */
+  --bg-elevated: #1A2120;             /* surfaceContainer */
+  --bg-hover: #252B2A;               /* surfaceContainerHigh */
+
+  /* --- Text --- */
+  --text-main: #DDE4E2;              /* onSurface */
+  --text-muted: #BEC9C7;             /* onSurfaceVariant */
+  --text-subtle: #899391;            /* outline */
+
+  /* --- Borders & Dividers --- */
+  --border-light: #3F4947;           /* surfaceVariant / outlineVariant */
+  --border-primary: #3F4947;         /* outlineVariant */
+
+  /* --- Interactive / Primary --- */
+  --action-primary: #81D5CD;         /* primary */
+  --action-primary-rgb: 129, 213, 205;
+  --action-hover: #9DF2E9;           /* primaryContainer-light as hover */
+  --action-disabled: #3F4947;        /* outlineVariant */
+  --on-primary: #003734;             /* onPrimary */
+  --primary-container: #00504B;      /* primaryContainer */
+  --on-primary-container: #9DF2E9;   /* onPrimaryContainer */
+
+  /* --- Interactive / Accent (tertiary) --- */
+  --cta-accent: #AFC9E7;             /* tertiary */
+  --cta-accent-hover: #CFE5FF;       /* tertiaryContainer-light */
+  --on-accent: #18324A;              /* onTertiary */
+  --accent-container: #304962;       /* tertiaryContainer */
+
+  /* --- Interactive / Secondary --- */
+  --secondary: #B0CCC8;              /* secondary */
+  --on-secondary: #1C3532;           /* onSecondary */
+  --secondary-container: #324B49;    /* secondaryContainer */
+  --on-secondary-container: #CCE8E4; /* onSecondaryContainer */
+
+  /* --- Semantic --- */
+  --color-success: #81D5CD;          /* primary in dark = teal glow */
+  --color-success-bg: #00504B;       /* primaryContainer */
+  --color-warning: #FFDEA6;          /* warm amber container as text */
+  --color-warning-bg: #3A2E1F;       /* dark warm bg */
+  --color-error: #FFB4AB;            /* error */
+  --color-error-bg: #93000A;         /* errorContainer */
+  --on-error: #690005;               /* onError */
+  --color-info: #AFC9E7;             /* tertiary */
+  --color-info-bg: #304962;          /* tertiaryContainer */
+
+  /* --- Sidebar (M3 darkest surfaces) --- */
+  --sidebar-bg: #090F0F;             /* surfaceContainerLowest */
+  --sidebar-active: #00504B;         /* primaryContainer — teal glow on dark */
+  --sidebar-border: #1A2120;         /* surfaceContainer */
+  --sidebar-text: #DDE4E2;           /* onSurface */
+  --sidebar-text-muted: rgba(190, 201, 199, 0.6);
+  --sidebar-hover: rgba(255, 255, 255, 0.06);
+
+  /* --- Finance Module (dark tertiary tones) --- */
+  --finance-bg: #0F1D2A;             /* tertiary-10 */
+  --finance-surface: #1A2120;        /* surfaceContainer */
+  --finance-header: #18324A;         /* onTertiary */
+  --finance-accent: #AFC9E7;         /* tertiary */
+  --finance-text: #CFE5FF;
+
+  /* --- Shadows (darker) --- */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: 0 8px 24px rgba(129, 213, 205, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════
+   System preference detection
+   ═══════════════════════════════════════════════════════ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-app: #0E1514;
+    --bg-surface: #161D1C;
+    --bg-elevated: #1A2120;
+    --bg-hover: #252B2A;
+    --text-main: #DDE4E2;
+    --text-muted: #BEC9C7;
+    --text-subtle: #899391;
+    --border-light: #3F4947;
+    --border-primary: #3F4947;
+    --action-primary: #81D5CD;
+    --action-primary-rgb: 129, 213, 205;
+    --action-hover: #9DF2E9;
+    --action-disabled: #3F4947;
+    --cta-accent: #AFC9E7;
+    --cta-accent-hover: #CFE5FF;
+    --color-success: #81D5CD;
+    --color-success-bg: #00504B;
+    --color-warning: #FFDEA6;
+    --color-warning-bg: #3A2E1F;
+    --color-error: #FFB4AB;
+    --color-error-bg: #93000A;
+    --color-info: #AFC9E7;
+    --color-info-bg: #304962;
+    --sidebar-bg: #090F0F;
+    --sidebar-active: #00504B;
+    --sidebar-border: #1A2120;
+    --sidebar-text: #DDE4E2;
+    --sidebar-text-muted: rgba(190, 201, 199, 0.6);
+    --sidebar-hover: rgba(255, 255, 255, 0.06);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   Base styles
+   ═══════════════════════════════════════════════════════ */
+* {
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Finance module override */
+[data-module="finance"] {
+  --bg-app: var(--finance-bg);
+  --bg-surface: var(--finance-surface);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════════════════ */
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-in-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+@keyframes checkmark-draw {
+  0% { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes number-count {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-number {
+  animation: number-count 0.4s ease-out;
+}
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--border-light) 25%,
+    var(--bg-hover) 50%,
+    var(--border-light) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+}
+
+/* Touch feedback */
+.touch-feedback {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-feedback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(var(--action-primary-rgb), 0.12) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.touch-feedback:active::after {
+  opacity: 1;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-subtle);
+}
+
+/* Safe area for mobile */
+.safe-bottom {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.safe-top {
+  padding-top: max(16px, env(safe-area-inset-top));
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Focus visible for accessibility */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--action-primary);
+  outline-offset: 2px;
+}
+
+/* Transition utilities */
+.transition-theme {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
