@@ -1,20 +1,24 @@
-// supabase/functions/verify-otp/index.ts
+// supabase/functions/send-otp/index.ts
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-// ── Environment ────────────────────────────────────────────────────────────
+const AT_USERNAME  = Deno.env.get('AT_USERNAME')  ?? ''
+const AT_API_KEY   = Deno.env.get('AT_API_KEY')   ?? ''
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
 const SERVICE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+const IS_SANDBOX   = AT_USERNAME === 'sandbox'
 
-// ── CORS ───────────────────────────────────────────────────────────────────
 const CORS = {
   'Access-Control-Allow-Origin':  '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey, x-client-info',
 }
 
-// ── Hash helper ────────────────────────────────────────────────────────────
+function generateOtp(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
 async function hashOtp(otp: string): Promise<string> {
   const data   = new TextEncoder().encode(otp)
   const buffer = await crypto.subtle.digest('SHA-256', data)
@@ -23,9 +27,7 @@ async function hashOtp(otp: string): Promise<string> {
     .join('')
 }
 
-// ── Main ───────────────────────────────────────────────────────────────────
 serve(async (req: Request) => {
-
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers: CORS })
   }
@@ -38,7 +40,6 @@ serve(async (req: Request) => {
   }
 
   try {
-    // ── Parse body ─────────────────────────────────────────────────────
     let body: any
     try {
       body = await req.json()
@@ -49,147 +50,110 @@ serve(async (req: Request) => {
       )
     }
 
-    const { phone, otp } = body
+    const { phone } = body
 
-    // ── Validate inputs ────────────────────────────────────────────────
-    if (!phone || !otp) {
+    if (!phone || typeof phone !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'Phone and OTP are required' }),
+        JSON.stringify({ error: 'Phone number is required' }),
         { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
       )
     }
 
     const cleanPhone = phone.trim()
-    const cleanOtp   = otp.toString().trim()
-
     if (!/^\+255\d{9}$/.test(cleanPhone)) {
       return new Response(
-        JSON.stringify({ error: 'Invalid phone format' }),
-        { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    if (!/^\d{6}$/.test(cleanOtp)) {
-      return new Response(
-        JSON.stringify({ error: 'OTP must be 6 digits' }),
+        JSON.stringify({ error: 'Invalid phone. Use format: +255712345678' }),
         { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
       )
     }
 
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
-    const otpHash  = await hashOtp(cleanOtp)
 
-    // ── Look up valid unused OTP ───────────────────────────────────────
-    const { data: record, error: lookupError } = await supabase
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
+    const { count } = await supabase
       .from('otp_codes')
-      .select('id, attempts')
+      .select('*', { count: 'exact', head: true })
       .eq('phone', cleanPhone)
-      .eq('otp_hash', otpHash)
-      .eq('used', false)
-      .gt('expires_at', new Date().toISOString())
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+      .gte('created_at', tenMinutesAgo)
 
-    if (lookupError) {
-      console.error('[verify-otp] lookup error:', JSON.stringify(lookupError))
-      throw new Error('Database error during OTP lookup')
-    }
-
-    // ── OTP not found ──────────────────────────────────────────────────
-    if (!record) {
-      // Increment attempts on most recent unused OTP for this phone
-      const { data: latest } = await supabase
-        .from('otp_codes')
-        .select('id, attempts')
-        .eq('phone', cleanPhone)
-        .eq('used', false)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-
-      if (latest) {
-        await supabase
-          .from('otp_codes')
-          .update({ attempts: (latest.attempts ?? 0) + 1 })
-          .eq('id', latest.id)
-
-        // Lock out after 5 wrong attempts
-        if ((latest.attempts ?? 0) >= 4) {
-          await supabase
-            .from('otp_codes')
-            .update({ used: true })          // invalidate OTP
-            .eq('id', latest.id)
-
-          return new Response(
-            JSON.stringify({
-              error: 'Too many wrong attempts. Please request a new OTP.',
-            }),
-            { status: 429, headers: { ...CORS, 'Content-Type': 'application/json' } }
-          )
-        }
-      }
-
+    if ((count ?? 0) >= 3) {
       return new Response(
-        JSON.stringify({ error: 'Invalid or expired OTP' }),
-        { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Too many OTP requests. Please wait 10 minutes.' }),
+        { status: 429, headers: { ...CORS, 'Content-Type': 'application/json' } }
       )
     }
 
-    // ── Mark OTP as used (single-use enforcement) ──────────────────────
-    await supabase
+    const otp       = generateOtp()
+    const otpHash   = await hashOtp(otp)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+
+    const { error: insertError } = await supabase
       .from('otp_codes')
-      .update({ used: true })
-      .eq('id', record.id)
+      .insert({
+        phone:      cleanPhone,
+        otp_hash:   otpHash,
+        expires_at: expiresAt,
+        used:       false,
+        attempts:   0,
+      })
 
-    // ── Update phone_verified_at in public.users ───────────────────────
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ phone_verified_at: new Date().toISOString() })
-      .eq('phone', cleanPhone)
-
-    if (updateError) {
-      console.warn('[verify-otp] phone_verified_at update failed:', updateError)
-      // Non-fatal — user is still verified
+    if (insertError) {
+      console.error('[send-otp] DB insert error:', JSON.stringify(insertError))
+      throw new Error('Failed to store OTP')
     }
 
-    // ── Generate Supabase session for this user ────────────────────────
-    // Use admin generateLink to create a magic link session
-    const { data: userRecord } = await supabase
-      .from('users')
-      .select('id')
-      .eq('phone', cleanPhone)
-      .maybeSingle()
+    const message = `CHOIRGRID: Msimbo wako ni ${otp}. Halali dakika 10. Usimpe mtu yeyote.`
 
-    let session = null
-
-    if (userRecord?.id) {
-      const { data: sessionData, error: sessionError } =
-        await supabase.auth.admin.generateLink({
-          type:  'magiclink',
-          email: `${userRecord.id}@choirgrid.internal`,  // placeholder
-        })
-
-      if (sessionError) {
-        console.warn('[verify-otp] session generation failed:', sessionError)
-      } else {
-        session = sessionData
-      }
+    const atParams: Record<string, string> = {
+      username: AT_USERNAME,
+      to:       cleanPhone,
+      message,
     }
 
-    console.log(`[verify-otp] ${cleanPhone} verified successfully`)
+    if (!IS_SANDBOX) {
+      atParams.from = Deno.env.get('AT_SENDER_ID') ?? 'CHOIRGRID'
+    }
+
+    const atEndpoint = IS_SANDBOX
+      ? 'https://api.sandbox.africastalking.com/version1/messaging'
+      : 'https://api.africastalking.com/version1/messaging'
+
+    console.log('[send-otp] IS_SANDBOX:', IS_SANDBOX)
+
+    const atRes = await fetch(atEndpoint, {
+      method:  'POST',
+      headers: {
+        'Accept':       'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'apiKey':       AT_API_KEY,
+      },
+      body: new URLSearchParams(atParams).toString(),
+    })
+
+    const atData = await atRes.json()
+    console.log('[send-otp] AT response:', JSON.stringify(atData))
+
+    const recipient = atData?.SMSMessageData?.Recipients?.[0]
+
+    if (!atRes.ok) {
+      throw new Error(`AT API error ${atRes.status}: ${JSON.stringify(atData)}`)
+    }
+
+    if (!recipient) {
+      throw new Error(`AT returned no recipients: ${JSON.stringify(atData)}`)
+    }
 
     return new Response(
       JSON.stringify({
-        success:  true,
-        verified: true,
-        session,                              // may be null — client handles
+        success: true,
+        message: 'OTP sent successfully',
+        debug:   { sandbox: IS_SANDBOX, at_status: recipient.status },
       }),
       { status: 200, headers: { ...CORS, 'Content-Type': 'application/json' } }
     )
 
   } catch (err: any) {
-    console.error('[verify-otp] unhandled error:', err?.message ?? err)
+    console.error('[send-otp] error:', err?.message ?? err)
     return new Response(
       JSON.stringify({ error: err?.message ?? 'Internal server error' }),
       { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } }

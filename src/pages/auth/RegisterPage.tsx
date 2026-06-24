@@ -1,87 +1,97 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Phone, User, Music2, ChevronRight, Lock } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { useAuthStore } from '@/store/auth.store';
-import { useToast } from '@/components/ui/Toast';
+// src/pages/auth/RegisterPage.tsx
+
+import React, { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { Phone, User, Music2, ChevronRight, Lock } from 'lucide-react'
+import { Card } from '@/components/ui/Card'
+import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
+import { useAuthStore } from '@/store/auth.store'
+import { useToast } from '@/components/ui/Toast'
 
 const RegisterPage: React.FC = () => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { register } = useAuthStore();
-  const toast = useToast();
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { register } = useAuthStore()
+  const toast = useToast()
 
   const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    password: '',
+    fullName:        '',
+    phone:           '',
+    password:        '',
     confirmPassword: '',
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  })
+  const [errors, setErrors]     = useState<Record<string, string>>({})
+  const [isLoading, setIsLoading] = useState(false)
 
-  // ── Validation ────────────────────────────────────────────────────────────
+  // ── Validation ─────────────────────────────────────────────────────────────
   const validate = (): boolean => {
-    const e: Record<string, string> = {};
+    const e: Record<string, string> = {}
 
     if (!formData.fullName.trim())
-      e.fullName = t('errors.validation');
+      e.fullName = t('errors.validation')
 
     if (!formData.phone)
-      e.phone = t('auth.invalid_phone');
+      e.phone = t('auth.invalid_phone')
     else if (!/^\+?255\d{9}$/.test(formData.phone.replace(/\s/g, '')))
-      e.phone = t('auth.invalid_phone');
+      e.phone = t('auth.invalid_phone')
 
     if (!formData.password || formData.password.length < 6)
-      e.password = t('errors.validation');
+      e.password = t('errors.validation')
 
     if (formData.password !== formData.confirmPassword)
-      e.confirmPassword = t('errors.validation');
+      e.confirmPassword = t('errors.validation')
 
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
 
-  // ── Field setter — clears error on change ─────────────────────────────────
+  // ── Field setter — clears error on change ──────────────────────────────────
   const set = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }))
     setErrors(prev => {
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
-  };
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }
 
-  // ── Normalise phone to E.164 ──────────────────────────────────────────────
+  // ── Normalise to E.164 ─────────────────────────────────────────────────────
   const normalisePhone = (raw: string): string => {
-    const digits = raw.replace(/\s/g, '');
-    return digits.startsWith('+') ? digits : `+${digits}`;
-  };
+    const digits = raw.replace(/\s/g, '')
+    return digits.startsWith('+') ? digits : `+${digits}`
+  }
 
-  // ── Submit ────────────────────────────────────────────────────────────────
+  // ── Submit ─────────────────────────────────────────────────────────────────
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+    e.preventDefault()
+    if (!validate()) return
 
-    const phone = normalisePhone(formData.phone);
-    setIsLoading(true);
+    const phone = normalisePhone(formData.phone)
+    setIsLoading(true)
 
     try {
-      await register(phone, formData.password, formData.fullName.trim());
-      toast.success(t('common.done'));
-      navigate('/verify-otp', { state: { phone } });  // ← pass normalised phone
+      await register(phone, formData.password, formData.fullName.trim())
+      toast.success(t('auth.otp_sent', { phone }))
+
+      // Pass phone + password in navigate state
+      // password is in-memory only — never hits URL or localStorage
+      // OTP page needs it to call signInWithPassword after OTP verified
+      navigate('/verify-otp', {
+        state: {
+          phone,
+          password: formData.password,
+        },
+      })
     } catch (err: any) {
-      // Show the actual Supabase error message to aid debugging
-      const message = err?.message ?? t('errors.save_failed');
-      toast.error(message);
-      console.error('[RegisterPage] registration error:', err);
+      const message = err?.message ?? t('errors.save_failed')
+      toast.error(message)
+      console.error('[RegisterPage] registration error:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg-app)] flex flex-col items-center justify-center p-4">
@@ -166,7 +176,7 @@ const RegisterPage: React.FC = () => {
 
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default RegisterPage;
+export default RegisterPage

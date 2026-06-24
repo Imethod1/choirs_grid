@@ -1,13 +1,13 @@
 /**
  * Offline Queue
- * 
+ *
  * Stores pending actions in localStorage when offline.
  * When the app comes back online, queued actions are replayed in order.
- * 
+ *
  * Supported actions:
  * - attendance marks
  * - RSVP responses
- * 
+ *
  * Finance actions are NEVER queued — they require a live connection.
  */
 
@@ -20,6 +20,7 @@ export interface QueuedAction {
 }
 
 const QUEUE_KEY = 'choir-app-offline-queue';
+const MAX_RETRIES = 3;
 
 export function getQueue(): QueuedAction[] {
   try {
@@ -30,6 +31,10 @@ export function getQueue(): QueuedAction[] {
   }
 }
 
+function saveQueue(queue: QueuedAction[]): void {
+  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+}
+
 export function enqueue(action: Omit<QueuedAction, 'id' | 'timestamp' | 'retries'>): void {
   const queue = getQueue();
   queue.push({
@@ -38,12 +43,12 @@ export function enqueue(action: Omit<QueuedAction, 'id' | 'timestamp' | 'retries
     timestamp: new Date().toISOString(),
     retries: 0,
   });
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  saveQueue(queue);
 }
 
 export function dequeue(actionId: string): void {
   const queue = getQueue().filter((a) => a.id !== actionId);
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  saveQueue(queue);
 }
 
 export function clearQueue(): void {
@@ -63,33 +68,34 @@ export async function replayQueue(
   handler: (action: QueuedAction) => Promise<boolean>
 ): Promise<number> {
   const queue = getQueue();
+  if (queue.length === 0) return 0;
+
   let synced = 0;
+  const remaining: QueuedAction[] = [];
 
   for (const action of queue) {
     try {
       const success = await handler(action);
       if (success) {
-        dequeue(action.id);
         synced++;
+        // Action succeeded — do NOT keep it in the queue
       } else {
-        // Increment retry count
         action.retries++;
-        if (action.retries >= 3) {
-          // Give up after 3 retries
-          dequeue(action.id);
+        if (action.retries < MAX_RETRIES) {
+          remaining.push(action);
         }
+        // If retries exhausted, drop the action
       }
     } catch {
       action.retries++;
-      if (action.retries >= 3) {
-        dequeue(action.id);
+      if (action.retries < MAX_RETRIES) {
+        remaining.push(action);
       }
     }
   }
 
-  // Save updated retry counts
-  const remaining = getQueue();
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(remaining));
+  // Save only the remaining (failed but retriable) actions
+  saveQueue(remaining);
 
   return synced;
 }

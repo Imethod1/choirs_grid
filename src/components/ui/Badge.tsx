@@ -42,7 +42,7 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
 Badge.displayName = 'Badge';
 
 interface StatusBadgeProps {
-  status: 'active' | 'probation' | 'inactive' | 'alumni' | 'guest' | 'present' | 'absent' | 'late' | 'excused';
+  status: string;
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {

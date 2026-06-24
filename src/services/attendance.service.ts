@@ -15,25 +15,29 @@ export async function getAttendance(eventId: string): Promise<Record<string, Att
   if (error) throw error;
 
   const marks: Record<string, AttendanceStatus> = {};
-  (data || []).forEach((row: any) => {
-    marks[row.member_id] = row.status;
+  (data || []).forEach((row: { member_id: string; status: string }) => {
+    marks[row.member_id] = row.status as AttendanceStatus;
   });
   return marks;
 }
 
 export async function saveAttendance(eventId: string, marks: AttendanceMark[]): Promise<void> {
-  // Upsert all marks in a single transaction
+  // Get current authenticated user for marked_by
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  // Upsert all marks
   const records = marks.map((mark) => ({
     event_id: eventId,
     member_id: mark.memberId,
     status: mark.status,
-    marked_by: '', // Will be set by RLS/trigger
+    marked_by: user.id,
     marked_at: new Date().toISOString(),
   }));
 
   const { error } = await supabase
     .from('attendance_records')
-    .upsert(records as any, { onConflict: 'event_id,member_id' });
+    .upsert(records as never[], { onConflict: 'event_id,member_id' });
 
   if (error) throw error;
 }

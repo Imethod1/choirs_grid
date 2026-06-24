@@ -85,15 +85,19 @@ export function clearLockout(): void {
 }
 
 // ── Content filter (for messages) ──────────────────────
-const SENSITIVE_PATTERNS = [
-  /\+?255\d{9}/g,            // Tanzanian phone numbers
-  /\b\d{4,6}\b/g,             // OTP-like codes (4-6 digits)
-  /TZS\s?\d+/gi,              // Currency amounts
-  /\d{1,3}(,\d{3})+/g,        // Formatted numbers like 1,000,000
-];
+// NOTE: Do NOT use /g flag on module-level RegExp — the global flag retains
+// lastIndex state between .test() calls, causing intermittent false negatives.
+function getSensitivePatterns(): RegExp[] {
+  return [
+    /\+?255\d{9}/,              // Tanzanian phone numbers
+    /\b\d{4,6}\b/,               // OTP-like codes (4-6 digits)
+    /TZS\s?\d+/i,                // Currency amounts
+    /\d{1,3}(,\d{3})+/,          // Formatted numbers like 1,000,000
+  ];
+}
 
 export function containsSensitiveContent(text: string): boolean {
-  return SENSITIVE_PATTERNS.some((pattern) => pattern.test(text));
+  return getSensitivePatterns().some((pattern) => pattern.test(text));
 }
 
 // ── Audit helpers ──────────────────────────────────────

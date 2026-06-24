@@ -1472,3 +1472,19 @@ export type Expense = Database['public']['Tables']['expenses']['Row'];
 export type Message = Database['public']['Tables']['messages']['Row'];
 export type MusicFile = Database['public']['Tables']['music_files']['Row'];
 export type Document = Database['public']['Tables']['documents']['Row'];
+export type Poll = Database['public']['Tables']['polls']['Row'];
+export type PollResponse = Database['public']['Tables']['poll_responses']['Row'];
+export type FinanceAuditLog = Database['public']['Tables']['finance_audit_log']['Row'];
+
+// Application-level enum types (mirrors database enums)
+export type AttendanceStatus = 'present' | 'absent' | 'late' | 'excused';
+export type RsvpResponse = 'going' | 'not_going' | 'maybe';
+export type MemberRole = 'super_admin' | 'choir_leader' | 'assistant_leader' | 'secretary' | 'treasurer' | 'music_teacher' | 'member';
+export type MemberStatus = 'active' | 'probation' | 'inactive' | 'alumni' | 'guest';
+export type VoicePart = 'soprano' | 'alto' | 'tenor' | 'bass';
+export type EventType = 'rehearsal' | 'mass' | 'wedding' | 'funeral' | 'concert' | 'meeting' | 'other';
+export type ContributionCategory = 'monthly_dues' | 'fundraiser' | 'special' | 'other';
+export type ExpenseCategory = 'transport' | 'venue' | 'materials' | 'equipment' | 'meals' | 'other';
+export type MessageChannel = 'sms' | 'push' | 'in_app';
+export type MessageTargetType = 'all' | 'role' | 'voice_part' | 'individual';
+export type DocumentFolder = 'constitution' | 'minutes' | 'circulars' | 'reports' | 'other';

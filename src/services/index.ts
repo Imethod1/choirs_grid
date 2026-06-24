@@ -1,9 +1,9 @@
 /**
  * Service Barrel Exports
- * 
+ *
  * Each service returns either mock or real Supabase implementation
  * based on VITE_USE_MOCK_SERVICES environment variable.
- * 
+ *
  * To switch: change VITE_USE_MOCK_SERVICES in .env — no code changes needed.
  */
 import { getService } from '@/lib/service-factory';
