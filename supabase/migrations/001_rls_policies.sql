@@ -1,6 +1,12 @@
 -- ═══════════════════════════════════════════════════════
 -- RLS Policies — Choir App
--- Run after all tables are created
+-- Run after 000_schema.sql (which creates ENUM types)
+--
+-- IMPORTANT: The schema uses PostgreSQL ENUMs (member_role,
+-- member_status, etc.). RLS helper functions accept TEXT/TEXT[]
+-- parameters for compatibility with Supabase client libraries.
+-- We cast enum columns to TEXT where they are compared against
+-- text literals or text arrays.
 -- ═══════════════════════════════════════════════════════
 
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -18,25 +24,27 @@ ALTER TABLE practice_recordings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 
 -- ── Helper: Check active membership in a choir ─────────
+-- Cast status::TEXT so the enum compares against text literals.
 CREATE OR REPLACE FUNCTION is_active_member(p_choir_id UUID)
 RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1 FROM choir_members
     WHERE choir_id = p_choir_id
       AND user_id = auth.uid()
-      AND status IN ('active', 'probation')
+      AND status::TEXT IN ('active', 'probation')
   );
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
 -- ── Helper: Check role in a choir ──────────────────────
+-- Cast role::TEXT and status::TEXT so they compare against text values.
 CREATE OR REPLACE FUNCTION has_choir_role(p_choir_id UUID, p_roles TEXT[])
 RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1 FROM choir_members
     WHERE choir_id = p_choir_id
       AND user_id = auth.uid()
-      AND status IN ('active', 'probation')
-      AND role = ANY(p_roles)
+      AND status::TEXT IN ('active', 'probation')
+      AND role::TEXT = ANY(p_roles)
   );
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 

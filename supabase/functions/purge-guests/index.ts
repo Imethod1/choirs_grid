@@ -1,17 +1,15 @@
-/**
- * Edge Function: purge-guests
- * Trigger: Cron (daily via pg_cron or external scheduler)
- * Purpose: Soft-deletes guest/visitor choir_member records older than 90 days
- *
- * Wire to Supabase pg_cron:
- *   SELECT cron.schedule('purge-guests', '0 2 * * *',
- *     $$SELECT net.http_post(
- *       url := current_setting('app.supabase_url') || '/functions/v1/purge-guests',
- *       headers := jsonb_build_object('Authorization', 'Bearer ' || current_setting('app.service_role_key')),
- *       body := '{}'::jsonb
- *     )$$
- *   );
- */
+// Edge Function: purge-guests
+// Trigger: Cron (daily via pg_cron or external scheduler)
+// Purpose: Soft-deletes guest/visitor choir_member records older than 90 days
+//
+// Wire to Supabase pg_cron:
+//   SELECT cron.schedule('purge-guests', '0 2 * * *',
+//     $$SELECT net.http_post(
+//       url := current_setting('app.supabase_url') || '/functions/v1/purge-guests',
+//       headers := jsonb_build_object('Authorization', 'Bearer ' || current_setting('app.service_role_key')),
+//       body := '{}'::jsonb
+//     )$$
+//   );
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'

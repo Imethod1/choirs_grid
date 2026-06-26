@@ -1,17 +1,15 @@
-/**
- * Edge Function: send-event-reminders
- * Trigger: Cron (every 30 minutes via pg_cron or external scheduler)
- * Purpose: Queries events in next 24h/2h, sends SMS via Africa's Talking
- *
- * Wire to Supabase pg_cron:
- *   SELECT cron.schedule('send-event-reminders', '*/30 * * * *',
- *     $$SELECT net.http_post(
- *       url := current_setting('app.supabase_url') || '/functions/v1/send-event-reminders',
- *       headers := jsonb_build_object('Authorization', 'Bearer ' || current_setting('app.service_role_key')),
- *       body := '{}'::jsonb
- *     )$$
- *   );
- */
+// Edge Function: send-event-reminders
+// Trigger: Cron (every 30 minutes via pg_cron or external scheduler)
+// Purpose: Queries events in next 24h/2h, sends SMS via Africa's Talking
+//
+// Wire to Supabase pg_cron:
+//   SELECT cron.schedule('send-event-reminders', '*/30 * * * *',
+//     $$SELECT net.http_post(
+//       url := current_setting('app.supabase_url') || '/functions/v1/send-event-reminders',
+//       headers := jsonb_build_object('Authorization', 'Bearer ' || current_setting('app.service_role_key')),
+//       body := '{}'::jsonb
+//     )$$
+//   );
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'

@@ -13,16 +13,16 @@ export interface AuthResult {
   choirMember: ChoirMember | null
 }
 
-// ── Internal: normalise phone for Supabase auth ────────────────────────────
-// Supabase auth stores phone WITHOUT + prefix (e.g. 255789467876)
-// Our Edge Functions and public.users use WITH + prefix (E.164)
-function toSupabasePhone(phone: string): string {
-  return phone.startsWith('+') ? phone.slice(1) : phone
-}
-
-// ── Internal: normalise phone to E.164 for Edge Functions ─────────────────
+// ── Internal: normalise phone to E.164 for Edge Functions/public.users ─────
 function toE164(phone: string): string {
   return phone.startsWith('+') ? phone : `+${phone}`
+}
+
+// ── Internal: convert phone to private synthetic email for Supabase Auth ───
+// This avoids Supabase native Phone Provider while users still login by phone.
+function phoneToAuthEmail(phone: string): string {
+  const digits = toE164(phone).replace(/\D/g, '')
+  return `${digits}@auth.choirgrid.app`
 }
 
 // ── Internal: call Edge Function with retry ───────────────────────────────
@@ -96,14 +96,15 @@ export async function signUp(
   password: string,
   fullName: string
 ): Promise<{ phone: string }> {
-  const supabasePhone = toSupabasePhone(phone)
-  const e164Phone     = toE164(phone)
+  const e164Phone = toE164(phone)
+  const authEmail = phoneToAuthEmail(phone)
 
   const { error } = await supabase.auth.signUp({
-    phone:    supabasePhone,
+    email: authEmail,
     password,
     options: {
       data: {
+        phone_e164:          e164Phone,
         full_name:          fullName,
         display_name:       fullName,
         preferred_language: 'sw',
@@ -130,8 +131,8 @@ export async function verifyOtp(
   otp: string,
   password: string
 ): Promise<AuthResult> {
-  const supabasePhone = toSupabasePhone(phone)
-  const e164Phone     = toE164(phone)
+  const e164Phone = toE164(phone)
+  const authEmail = phoneToAuthEmail(phone)
 
   // Step 1: validate OTP via our Edge Function (E.164 format)
   await callFunction<{ success: boolean; verified: boolean }>(
@@ -139,9 +140,9 @@ export async function verifyOtp(
     { phone: e164Phone, otp }
   )
 
-  // Step 2: sign in with password using Supabase format (no +)
+  // Step 2: sign in with password using private synthetic email
   const { data, error } = await supabase.auth.signInWithPassword({
-    phone:    supabasePhone,
+    email: authEmail,
     password,
   })
 
@@ -159,7 +160,7 @@ export async function signInWithPhone(
   password: string
 ): Promise<AuthResult> {
   const { data, error } = await supabase.auth.signInWithPassword({
-    phone:    toSupabasePhone(phone),
+    email: phoneToAuthEmail(phone),
     password,
   })
 
