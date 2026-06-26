@@ -366,6 +366,21 @@ body {
   animation: number-count 0.4s ease-out;
 }
 
+/* Staggered list / grid entrance (UI/UX pattern #33).
+   Apply .stagger-item to children; cascade via inline --stagger-index. */
+.stagger-item {
+  opacity: 0;
+  animation: number-count 0.45s ease-out forwards;
+  animation-delay: calc(var(--stagger-index, 0) * 70ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger-item {
+    opacity: 1;
+    animation: none;
+  }
+}
+
 /* Skeleton loader */
 .skeleton {
   background: linear-gradient(

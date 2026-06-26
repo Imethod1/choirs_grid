@@ -67,13 +67,13 @@ const DashboardPage: React.FC = () => {
         <Avatar name={user?.full_name || ''} size="lg" />
       </div>
 
-      {/* Stats grid */}
+      {/* Stats grid — Bento tiles with staggered entrance (UI/UX #7 + #33) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {statCards.map((stat) => {
+        {statCards.map((stat, i) => {
           const Icon = stat.icon;
           return (
-            <Link key={stat.key} to={stat.link}>
-              <Card hoverable className="h-full">
+            <Link key={stat.key} to={stat.link} className="stagger-item" style={{ ['--stagger-index' as string]: i }}>
+              <Card variant="bento" hoverable className="h-full">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm text-[var(--text-muted)]">{stat.label}</p>

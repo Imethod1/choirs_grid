@@ -45,10 +45,10 @@ export const TopBar: React.FC = () => {
   return (
     <header
       className={cn(
-        'flex items-center justify-between h-14 px-4 border-b lg:hidden transition-theme',
+        'sticky top-0 z-30 flex items-center justify-between h-14 px-4 border-b lg:hidden transition-theme backdrop-blur-md',
         isFinanceModule
-          ? 'bg-[var(--finance-header)] border-[var(--border-light)]'
-          : 'bg-[var(--bg-surface)] border-[var(--border-light)]'
+          ? 'bg-[var(--finance-header)]/95 border-[var(--border-light)]'
+          : 'bg-[var(--bg-surface)]/90 border-[var(--border-light)]'
       )}
     >
       {/* Left section */}

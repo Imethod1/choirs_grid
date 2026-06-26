@@ -26,6 +26,11 @@
   .tile{background:var(--bg-elevated);border:1px solid var(--border-light);border-radius:var(--radius-lg);
     padding:18px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:all .2s}
   .tile:hover{box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}
+  @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .tile{opacity:0;animation:pop .45s ease-out forwards}
+  .tile:nth-child(1){animation-delay:0ms}.tile:nth-child(2){animation-delay:70ms}
+  .tile:nth-child(3){animation-delay:140ms}.tile:nth-child(4){animation-delay:210ms}
+  .tile:nth-child(5){animation-delay:280ms}.tile:nth-child(6){animation-delay:350ms}
   .tile::before{content:'';position:absolute;inset:0 0 auto 0;height:4px;
     background:linear-gradient(90deg,var(--action-primary),var(--green-400))}
   .tile.wide{grid-column:span 2}
