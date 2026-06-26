@@ -79,9 +79,31 @@ const OtpVerificationPage: React.FC = () => {
       toast.success(t('common.done'))
       navigate('/', { replace: true })
     } catch (err: any) {
-      const message = err?.message ?? t('auth.invalid_otp')
+      // Map raw errors to clear, user-friendly messaging.
+      const raw = (err?.message ?? '').toLowerCase()
+      let message: string
+      if (raw.includes('expired')) {
+        message = t('auth.otp_expired', {
+          defaultValue: 'This code has expired. Tap "Resend" to get a new one.',
+        })
+      } else if (
+        raw.includes('network') ||
+        raw.includes('failed to fetch') ||
+        raw.includes('unavailable') ||
+        err?.status >= 500
+      ) {
+        message = t('errors.network')
+      } else if (raw.includes('attempts') || raw.includes('too many')) {
+        message = t('auth.otp_too_many', {
+          defaultValue: 'Too many attempts. Please request a new code.',
+        })
+      } else {
+        message = err?.message || t('auth.invalid_otp')
+      }
       setError(message)
       toast.error(message)
+      // Clear the field on a definitively wrong/expired code so the user re-enters.
+      if (!raw.includes('network') && !raw.includes('unavailable')) setOtp('')
     } finally {
       setIsLoading(false)
     }

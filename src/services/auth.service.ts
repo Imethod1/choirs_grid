@@ -25,7 +25,24 @@ function phoneToAuthEmail(phone: string): string {
   return `${digits}@auth.choirgrid.app`
 }
 
+/**
+ * Client-facing error from an Edge Function. Carries the HTTP status so
+ * callers can distinguish "expired/invalid OTP" (4xx) from transient
+ * network/server problems (5xx / no response).
+ */
+class EdgeFunctionError extends Error {
+  status: number
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'EdgeFunctionError'
+    this.status = status
+  }
+}
+
 // ── Internal: call Edge Function with retry ───────────────────────────────
+// Retries ONLY on network failures and 5xx (transient) errors with
+// exponential backoff. 4xx client errors (invalid/expired OTP, validation,
+// rate-limit) fail fast — retrying them is wasteful and can burn OTP attempts.
 async function callFunction<T>(
   name: string,
   body: Record<string, unknown>,
@@ -45,19 +62,37 @@ async function callFunction<T>(
         body: JSON.stringify(body),
       })
 
-      const data = await res.json()
+      let data: any = null
+      try {
+        data = await res.json()
+      } catch {
+        // Non-JSON body (e.g. gateway HTML on 5xx) — treat as transient.
+        if (!res.ok && res.status >= 500) {
+          throw new EdgeFunctionError(`${name} unavailable (status ${res.status})`, res.status)
+        }
+      }
 
       if (!res.ok) {
-        throw new Error(data?.error ?? `${name} failed with status ${res.status}`)
+        const message = data?.error ?? `${name} failed with status ${res.status}`
+        const httpErr = new EdgeFunctionError(message, res.status)
+        // 4xx → caller's input problem: do not retry, surface immediately.
+        if (res.status >= 400 && res.status < 500) throw httpErr
+        // 5xx → transient: allow retry below.
+        lastError = httpErr
+      } else {
+        return data as T
       }
-
-      return data as T
     } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err))
-      if (attempt < retries) {
-        // Exponential backoff: 500ms, 1000ms
-        await new Promise(r => setTimeout(r, 500 * (attempt + 1)))
+      // A 4xx EdgeFunctionError must bubble out without retrying.
+      if (err instanceof EdgeFunctionError && err.status >= 400 && err.status < 500) {
+        throw err
       }
+      lastError = err instanceof Error ? err : new Error(String(err))
+    }
+
+    if (attempt < retries) {
+      // Exponential backoff: 500ms, 1000ms
+      await new Promise(r => setTimeout(r, 500 * (attempt + 1)))
     }
   }
 
