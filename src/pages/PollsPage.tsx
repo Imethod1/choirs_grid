@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useAuthStore } from '@/store/auth.store';
+import { LEADERSHIP_ROLES } from '@/lib/rbac';
 import { useToast } from '@/components/ui/Toast';
 
 interface PollOption {
@@ -60,7 +61,7 @@ const PollsPage: React.FC = () => {
   const { t } = useTranslation();
   const { hasAnyRole } = useAuthStore();
   const toast = useToast();
-  const canCreate = hasAnyRole(['choir_leader', 'assistant_leader', 'super_admin']);
+  const canCreate = hasAnyRole(LEADERSHIP_ROLES);
 
   const [polls, setPolls] = useState(mockPolls);
 

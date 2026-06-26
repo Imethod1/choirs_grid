@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { useUIStore } from '@/store/ui.store';
 import { useAuthStore } from '@/store/auth.store';
+import { PII_ROLES, LEADERSHIP_ROLES } from '@/lib/rbac';
 import { AddMemberForm } from '@/components/forms/AddMemberForm';
 import { mockMembersWithUsers } from '@/lib/mock-data';
 import type { MemberWithUser } from '@/types/app.types';
@@ -19,7 +20,7 @@ const MembersPage: React.FC = () => {
   const { t } = useTranslation();
   const { openBottomSheet } = useUIStore();
   const { hasAnyRole } = useAuthStore();
-  const canViewPhone = hasAnyRole(['choir_leader', 'assistant_leader', 'secretary', 'super_admin']);
+  const canViewPhone = hasAnyRole(PII_ROLES);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [voiceFilter, setVoiceFilter] = useState<VoicePart | 'all'>('all');
@@ -86,7 +87,7 @@ const MembersPage: React.FC = () => {
             {filteredMembers.length} {t('members.title').toLowerCase()}
           </p>
         </div>
-        {hasAnyRole(['choir_leader', 'assistant_leader', 'super_admin']) && (
+        {hasAnyRole(LEADERSHIP_ROLES) && (
           <Button size="sm" icon={<UserPlus className="h-4 w-4" />} onClick={() => openBottomSheet(<AddMemberForm />)}>
             {t('members.add_member')}
           </Button>

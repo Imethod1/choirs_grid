@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useAuthStore } from '@/store/auth.store';
+import { MUSIC_ROLES } from '@/lib/rbac';
 import { useUIStore } from '@/store/ui.store';
 import { UploadMusicForm } from '@/components/forms/UploadMusicForm';
 import { mockMusicFiles } from '@/lib/mock-data';
@@ -15,7 +16,7 @@ const MusicPage: React.FC = () => {
   const { t } = useTranslation();
   const { hasAnyRole } = useAuthStore();
   const { openBottomSheet } = useUIStore();
-  const canUpload = hasAnyRole(['choir_leader', 'music_teacher', 'super_admin']);
+  const canUpload = hasAnyRole(MUSIC_ROLES);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'library' | 'practice'>('library');

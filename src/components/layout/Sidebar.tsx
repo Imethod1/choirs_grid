@@ -15,28 +15,29 @@ import {
   BarChart3,
   Settings,
   ChevronLeft,
-  Lock,
   Music2,
 } from 'lucide-react';
 import { Avatar } from '../ui/Avatar';
+import type { MemberRole } from '@/types/database.types';
+import { FINANCE_ROLES, REPORTS_ROLES, GOVERNANCE_ROLES, roleAllowed } from '@/lib/rbac';
 
 interface NavItem {
   key: string;
   labelKey: string;
   icon: React.FC<{ className?: string }>;
   path: string;
-  roles?: string[];
+  roles?: MemberRole[];
 }
 
 const navItems: NavItem[] = [
   { key: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, path: '/' },
   { key: 'members', labelKey: 'nav.members', icon: Users, path: '/members' },
   { key: 'events', labelKey: 'nav.events', icon: Calendar, path: '/events' },
-  { key: 'finance', labelKey: 'nav.finance', icon: DollarSign, path: '/finance', roles: ['choir_leader', 'treasurer', 'super_admin'] },
+  { key: 'finance', labelKey: 'nav.finance', icon: DollarSign, path: '/finance', roles: FINANCE_ROLES },
   { key: 'messages', labelKey: 'nav.messages', icon: MessageSquare, path: '/messages' },
   { key: 'music', labelKey: 'nav.music', icon: Music, path: '/music' },
-  { key: 'documents', labelKey: 'nav.documents', icon: FileText, path: '/documents' },
-  { key: 'reports', labelKey: 'nav.reports', icon: BarChart3, path: '/reports' },
+  { key: 'documents', labelKey: 'nav.documents', icon: FileText, path: '/documents', roles: GOVERNANCE_ROLES },
+  { key: 'reports', labelKey: 'nav.reports', icon: BarChart3, path: '/reports', roles: REPORTS_ROLES },
   { key: 'settings', labelKey: 'nav.settings', icon: Settings, path: '/settings' },
 ];
 
@@ -48,8 +49,11 @@ export const Sidebar: React.FC = () => {
 
   const hasAccess = (item: NavItem) => {
     if (!item.roles) return true;
-    return item.roles.includes(choirMember?.role || '');
+    return roleAllowed(choirMember?.role, item.roles);
   };
+
+  // Hide unauthorized items entirely (not just lock them) per RBAC spec.
+  const visibleItems = navItems.filter(hasAccess);
 
   return (
     <aside
@@ -76,31 +80,25 @@ export const Sidebar: React.FC = () => {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-        {navItems.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon;
-          const accessible = hasAccess(item);
           const isActive = location.pathname === item.path || 
             (item.path !== '/' && location.pathname.startsWith(item.path));
 
           return (
             <NavLink
               key={item.key}
-              to={accessible ? item.path : '#'}
+              to={item.path}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group',
                 isActive
                   ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-text)]'
-                  : 'text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)]',
-                !accessible && 'opacity-50 cursor-not-allowed'
+                  : 'text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)]'
               )}
-              onClick={(e) => !accessible && e.preventDefault()}
             >
               <Icon className={cn('h-5 w-5 flex-shrink-0', !sidebarOpen && 'mx-auto')} />
               {sidebarOpen && (
-                <>
-                  <span className="flex-1 text-sm font-medium">{t(item.labelKey)}</span>
-                  {!accessible && <Lock className="h-4 w-4 opacity-50" />}
-                </>
+                <span className="flex-1 text-sm font-medium">{t(item.labelKey)}</span>
               )}
             </NavLink>
           );

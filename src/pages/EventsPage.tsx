@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useUIStore } from '@/store/ui.store';
 import { useAuthStore } from '@/store/auth.store';
+import { LEADERSHIP_ROLES } from '@/lib/rbac';
 import { CreateEventForm } from '@/components/forms/CreateEventForm';
 import { mockEvents } from '@/lib/mock-data';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, isToday } from 'date-fns';
@@ -27,7 +28,7 @@ const EventsPage: React.FC = () => {
   const { t } = useTranslation();
   const { openBottomSheet } = useUIStore();
   const { hasAnyRole } = useAuthStore();
-  const canCreateEvent = hasAnyRole(['choir_leader', 'assistant_leader', 'super_admin']);
+  const canCreateEvent = hasAnyRole(LEADERSHIP_ROLES);
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -364,7 +365,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event }) => {
       </div>
 
       <div className="flex gap-3">
-        {canMark(['choir_leader', 'assistant_leader', 'super_admin']) && (
+        {canMark(LEADERSHIP_ROLES) && (
           <Button variant="outline" fullWidth onClick={handleMarkAttendance}>
             {t('attendance.mark_attendance')}
           </Button>

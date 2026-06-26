@@ -14,20 +14,22 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { BottomSheetHeader } from '../ui/BottomSheet';
+import type { MemberRole } from '@/types/database.types';
+import { FINANCE_ROLES, REPORTS_ROLES, GOVERNANCE_ROLES, roleAllowed } from '@/lib/rbac';
 
 interface MenuItem {
   key: string;
   labelKey: string;
   icon: React.FC<{ className?: string }>;
   path: string;
-  roles?: string[];
+  roles?: MemberRole[];
 }
 
 const menuItems: MenuItem[] = [
-  { key: 'finance', labelKey: 'nav.finance', icon: DollarSign, path: '/finance', roles: ['choir_leader', 'treasurer', 'super_admin'] },
+  { key: 'finance', labelKey: 'nav.finance', icon: DollarSign, path: '/finance', roles: FINANCE_ROLES },
   { key: 'messages', labelKey: 'nav.messages', icon: MessageSquare, path: '/messages' },
-  { key: 'documents', labelKey: 'nav.documents', icon: FileText, path: '/documents' },
-  { key: 'reports', labelKey: 'nav.reports', icon: BarChart3, path: '/reports' },
+  { key: 'documents', labelKey: 'nav.documents', icon: FileText, path: '/documents', roles: GOVERNANCE_ROLES },
+  { key: 'reports', labelKey: 'nav.reports', icon: BarChart3, path: '/reports', roles: REPORTS_ROLES },
   { key: 'settings', labelKey: 'nav.settings', icon: Settings, path: '/settings' },
 ];
 
@@ -39,7 +41,7 @@ export const MoreMenu: React.FC = () => {
 
   const hasAccess = (item: MenuItem) => {
     if (!item.roles) return true;
-    return item.roles.includes(choirMember?.role || '');
+    return roleAllowed(choirMember?.role, item.roles);
   };
 
   const handleNavigate = (path: string, accessible: boolean) => {

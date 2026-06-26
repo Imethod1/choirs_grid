@@ -59,6 +59,8 @@ const enTranslations = {
     biometric_enable: 'Enable fingerprint / face login',
     invalid_phone: 'Please enter a valid Tanzanian phone number',
     invalid_otp: 'Invalid verification code',
+    otp_expired: 'This code has expired. Tap "Resend" to get a new one.',
+    otp_too_many: 'Too many attempts. Please request a new code.',
     login_failed: 'Login failed. Please check your credentials.',
   },
   dashboard: {
@@ -216,6 +218,7 @@ const enTranslations = {
     network: 'Network error. Please check your connection.',
     server: 'Server error. Please try again later.',
     unauthorized: 'You do not have permission to access this.',
+    no_permission: 'You do not have permission to view that page.',
     not_found: 'Not found',
     validation: 'Please check your input',
     save_failed: 'Failed to save. Please try again.',
@@ -290,6 +293,8 @@ const swTranslations = {
     biometric_enable: 'Wezesha kuingia kwa alama za vidole / uso',
     invalid_phone: 'Tafadhali ingiza nambari sahihi ya simu ya Tanzania',
     invalid_otp: 'Msimbo wa uthibitishaji si sahihi',
+    otp_expired: 'Msimbo huu umeisha muda. Bonyeza "Tuma tena" kupata mpya.',
+    otp_too_many: 'Majaribio mengi mno. Tafadhali omba msimbo mpya.',
     login_failed: 'Kuingia kumeshindwa. Tafadhali angalia taarifa zako.',
   },
   dashboard: {
@@ -447,6 +452,7 @@ const swTranslations = {
     network: 'Hitilafu ya mtandao. Tafadhali angalia muunganisho wako.',
     server: 'Hitilafu ya seva. Tafadhali jaribu tena baadaye.',
     unauthorized: 'Huna ruhusa ya kufikia hii.',
+    no_permission: 'Huna ruhusa ya kuona ukurasa huo.',
     not_found: 'Haipatikani',
     validation: 'Tafadhali angalia uingizaji wako',
     save_failed: 'Imeshindwa kuhifadhi. Tafadhali jaribu tena.',

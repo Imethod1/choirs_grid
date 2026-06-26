@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import type { User, Choir, ChoirMember } from '@/types/database.types'
 import { authService } from '@/services'
+import { isValidRole } from '@/lib/rbac'
 
 interface AuthState {
   user: User | null
@@ -123,11 +124,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // ── Role Helpers ──────────────────────────────────────────────────────────
   hasRole: (role) => {
     const { choirMember } = get()
+    // Reject unknown/corrupt roles defensively before comparing.
+    if (!isValidRole(choirMember?.role)) return false
     return choirMember?.role === role
   },
 
   hasAnyRole: (roles) => {
     const { choirMember } = get()
-    return roles.includes(choirMember?.role as ChoirMember['role'])
+    const current = choirMember?.role
+    if (!isValidRole(current)) return false
+    return roles.includes(current as ChoirMember['role'])
   },
 }))

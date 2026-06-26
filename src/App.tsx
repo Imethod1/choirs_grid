@@ -7,6 +7,8 @@ import { useUIStore } from './store/ui.store';
 import { useAuthStore } from './store/auth.store';
 import { useOfflineSync } from './hooks/useOfflineSync';
 import { queryClient } from './lib/queryClient';
+import { RoleRoute } from './components/auth/RoleRoute';
+import { FINANCE_ROLES, REPORTS_ROLES, GOVERNANCE_ROLES } from './lib/rbac';
 import './lib/i18n';
 
 // Lazy-load pages
@@ -168,9 +170,11 @@ export default function App() {
               <Route
                 path="finance"
                 element={
-                  <Suspense fallback={<PageLoader />}>
-                    <FinancePage />
-                  </Suspense>
+                  <RoleRoute allow={FINANCE_ROLES}>
+                    <Suspense fallback={<PageLoader />}>
+                      <FinancePage />
+                    </Suspense>
+                  </RoleRoute>
                 }
               />
               <Route
@@ -200,9 +204,11 @@ export default function App() {
               <Route
                 path="documents"
                 element={
-                  <Suspense fallback={<PageLoader />}>
-                    <DocumentsPage />
-                  </Suspense>
+                  <RoleRoute allow={GOVERNANCE_ROLES}>
+                    <Suspense fallback={<PageLoader />}>
+                      <DocumentsPage />
+                    </Suspense>
+                  </RoleRoute>
                 }
               />
               <Route
@@ -224,9 +230,11 @@ export default function App() {
               <Route
                 path="reports"
                 element={
-                  <Suspense fallback={<PageLoader />}>
-                    <AnalyticsDashboardPage />
-                  </Suspense>
+                  <RoleRoute allow={REPORTS_ROLES}>
+                    <Suspense fallback={<PageLoader />}>
+                      <AnalyticsDashboardPage />
+                    </Suspense>
+                  </RoleRoute>
                 }
               />
               <Route
