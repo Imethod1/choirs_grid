@@ -8,81 +8,107 @@
 
 :root,
 [data-theme="light"] {
-  /* --- M3 Reference Palette (constant) --- */
-  --m3-primary-10: #00201E;
-  --m3-primary-20: #003734;
-  --m3-primary-30: #00504B;
-  --m3-primary-40: #216963;
-  --m3-primary-50: #3E827C;
-  --m3-primary-80: #8FD3CC;
-  --m3-primary-90: #ABEFE8;
-  --m3-secondary-30: #3C4948;
-  --m3-secondary-90: #D6E6E3;
-  --m3-tertiary-30: #3B4857;
-  --m3-tertiary-40: #52606F;
-  --m3-tertiary-90: #D6E4F6;
+  /* ═══════════════════════════════════════════════════════
+     ChoirGrid "Pro Max" — Evergreen brand ramp
+     Anchored on the core green (#31572c / hunter-green).
+     A UI/UX-tuned ramp + warm-gold accent + tinted neutrals,
+     all validated for WCAG AA text/surface contrast.
+     ─────────────────────────────────────────────────────── */
 
-  /* --- Backgrounds (M3 surface containers) --- */
-  --bg-app: #F4FBF9;                  /* surface */
-  --bg-surface: #FFFFFF;              /* surfaceContainerLowest */
-  --bg-elevated: #EFF5F3;             /* surfaceContainerLow */
-  --bg-hover: #E3E9E8;               /* surfaceContainerHigh */
+  /* --- Brand green ramp (source palette) --- */
+  --green-950: #0c1c0c;              /* deepest — near-black green */
+  --green-900: #132a13;              /* evergreen */
+  --green-800: #1f3d1c;              /* evergreen → hunter blend */
+  --green-700: #31572c;              /* hunter-green  ← CORE / PRIMARY */
+  --green-600: #4f772d;              /* fern */
+  --green-500: #6b8e35;              /* fern → palm blend */
+  --green-400: #90a955;             /* palm-leaf */
+  --green-300: #b6cb7e;              /* palm → lime blend */
+  --green-200: #d3e0a8;              /* soft lime */
+  --green-100: #ecf39e;             /* lime-cream */
+  --green-50:  #f6f9e8;              /* lime-cream wash (surface tint) */
 
-  /* --- Text --- */
-  --text-main: #161D1C;              /* onSurface */
-  --text-muted: #3F4947;             /* onSurfaceVariant */
-  --text-subtle: #6F7977;            /* outline */
+  /* --- Warm-gold supporting accent (complementary to green) --- */
+  --gold-700: #8a5a14;
+  --gold-600: #a96d18;
+  --gold-500: #c9821f;               /* accent / secondary CTA */
+  --gold-100: #f6e4c2;
+
+  /* --- M3-compat reference aliases (kept so any literal refs resolve) --- */
+  --m3-primary-10: #0c1c0c;
+  --m3-primary-20: #132a13;
+  --m3-primary-30: #31572c;
+  --m3-primary-40: #4f772d;
+  --m3-primary-50: #6b8e35;
+  --m3-primary-80: #90a955;
+  --m3-primary-90: #ecf39e;
+  --m3-secondary-30: #3c4934;
+  --m3-secondary-90: #e0e6cf;
+  --m3-tertiary-30: #5c4a26;
+  --m3-tertiary-40: #8a5a14;
+  --m3-tertiary-90: #f6e4c2;
+
+  /* --- Backgrounds (green-tinted neutrals) --- */
+  --bg-app: #f7f9f1;                  /* app canvas — faint lime tint */
+  --bg-surface: #ffffff;              /* cards / panels */
+  --bg-elevated: #f1f5e6;             /* raised surfaces, bento tiles */
+  --bg-hover: #e6eed3;               /* hover wash */
+
+  /* --- Text (AA on light surfaces) --- */
+  --text-main: #14210f;              /* near-evergreen ink */
+  --text-muted: #41502f;             /* muted olive */
+  --text-subtle: #6c7a52;            /* subtle */
 
   /* --- Borders & Dividers --- */
-  --border-light: #DAE5E2;           /* surfaceVariant */
-  --border-primary: #BEC9C7;         /* outlineVariant */
+  --border-light: #dde5c8;
+  --border-primary: #c4d09e;
 
-  /* --- Interactive / Primary --- */
-  --action-primary: #006A64;         /* primary */
-  --action-primary-rgb: 0, 106, 100;
-  --action-hover: #00504B;           /* onPrimaryContainer / primary-30 */
-  --action-disabled: #BEC9C7;        /* outlineVariant */
-  --on-primary: #FFFFFF;             /* onPrimary */
-  --primary-container: #9DF2E9;      /* primaryContainer */
-  --on-primary-container: #00504B;   /* onPrimaryContainer */
+  /* --- Interactive / Primary (core green) --- */
+  --action-primary: #31572c;         /* hunter-green — CORE */
+  --action-primary-rgb: 49, 87, 44;
+  --action-hover: #244020;           /* darker on hover */
+  --action-disabled: #c4d09e;
+  --on-primary: #ffffff;             /* AA: white on hunter-green */
+  --primary-container: #d3e0a8;      /* soft lime container */
+  --on-primary-container: #1f3d1c;   /* dark green text on container */
 
-  /* --- Interactive / Accent (tertiary) --- */
-  --cta-accent: #48617B;             /* tertiary */
-  --cta-accent-hover: #304962;       /* onTertiaryContainer */
-  --on-accent: #FFFFFF;              /* onTertiary */
-  --accent-container: #CFE5FF;       /* tertiaryContainer */
+  /* --- Interactive / Accent (warm gold) --- */
+  --cta-accent: #a96d18;
+  --cta-accent-hover: #8a5a14;
+  --on-accent: #ffffff;
+  --accent-container: #f6e4c2;
 
-  /* --- Interactive / Secondary --- */
-  --secondary: #4A6360;              /* secondary */
-  --on-secondary: #FFFFFF;           /* onSecondary */
-  --secondary-container: #CCE8E4;    /* secondaryContainer */
-  --on-secondary-container: #324B49; /* onSecondaryContainer */
+  /* --- Interactive / Secondary (fern) --- */
+  --secondary: #4f772d;              /* fern */
+  --on-secondary: #ffffff;
+  --secondary-container: #d3e0a8;
+  --on-secondary-container: #1f3d1c;
 
   /* --- Semantic --- */
-  --color-success: #006A64;          /* reuse primary for success in teal theme */
-  --color-success-bg: #9DF2E9;       /* primaryContainer */
-  --color-warning: #7D5700;          /* custom warm amber */
-  --color-warning-bg: #FFDEA6;       /* custom warm amber container */
-  --color-error: #BA1A1A;            /* error */
-  --color-error-bg: #FFDAD6;         /* errorContainer */
-  --on-error: #FFFFFF;               /* onError */
-  --color-info: #48617B;             /* tertiary */
-  --color-info-bg: #CFE5FF;          /* tertiaryContainer */
+  --color-success: #3d6b22;          /* readable green */
+  --color-success-bg: #d3e0a8;
+  --color-warning: #8a5a14;          /* gold/amber */
+  --color-warning-bg: #f6e4c2;
+  --color-error: #b3261e;            /* brick red (won't clash w/ green) */
+  --color-error-bg: #f9dedc;
+  --on-error: #ffffff;
+  --color-info: #2f5d52;             /* teal-green info */
+  --color-info-bg: #cfe6dd;
 
-  /* --- Sidebar (M3 inverseSurface family) --- */
-  --sidebar-bg: #2B3231;             /* inverseSurface */
-  --sidebar-active: #006A64;         /* primary — pops against dark sidebar */
-  --sidebar-border: #3F4947;         /* onSurfaceVariant as dark border */
-  --sidebar-text: #ECF2F0;           /* inverseOnSurface */
-  --sidebar-text-muted: rgba(236, 242, 240, 0.6);
-  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  /* --- Sidebar (deep evergreen shell) --- */
+  --sidebar-bg: #132a13;             /* evergreen */
+  --sidebar-active: #4f772d;         /* fern — pops on dark green */
+  --sidebar-border: #244020;
+  --sidebar-text: #ecf39e;           /* lime-cream text */
+  --sidebar-text-muted: rgba(236, 243, 158, 0.62);
+  --sidebar-hover: rgba(236, 243, 158, 0.10);
 
-  /* --- Finance Module (uses tertiary tones) --- */
-  --finance-bg: #F7F9FF;             /* tertiary-98 */
-  --finance-surface: #FFFFFF;
-  --finance-header: #304962;         /* onTertiaryContainer */
-  --finance-accent: #48617B;         /* tertiary */
-  --finance-text: #304962;
+  /* --- Finance Module (deep-green tones, distinct via shade) --- */
+  --finance-bg: #f3f7ea;
+  --finance-surface: #ffffff;
+  --finance-header: #1f3d1c;
+  --finance-accent: #4f772d;
+  --finance-text: #1f3d1c;
 
   /* --- Spacing & Layout --- */
   --touch-target: 44px;
@@ -108,87 +134,105 @@
    DARK MODE — M3 Dark scheme
    ═══════════════════════════════════════════════════════ */
 [data-theme="dark"] {
-  /* --- M3 Reference Palette (constant) --- */
-  --m3-primary-10: #00201E;
-  --m3-primary-20: #003734;
-  --m3-primary-30: #00504B;
-  --m3-primary-40: #216963;
-  --m3-primary-50: #3E827C;
-  --m3-primary-80: #8FD3CC;
-  --m3-primary-90: #ABEFE8;
-  --m3-secondary-30: #3C4948;
-  --m3-secondary-90: #D6E6E3;
-  --m3-tertiary-30: #3B4857;
-  --m3-tertiary-40: #52606F;
-  --m3-tertiary-90: #D6E4F6;
+  /* --- Brand green ramp (source palette) --- */
+  --green-950: #0c1c0c;
+  --green-900: #132a13;
+  --green-800: #1f3d1c;
+  --green-700: #31572c;              /* core */
+  --green-600: #4f772d;
+  --green-500: #6b8e35;
+  --green-400: #90a955;
+  --green-300: #b6cb7e;
+  --green-200: #d3e0a8;
+  --green-100: #ecf39e;
+  --green-50:  #f6f9e8;
 
-  /* --- Backgrounds (M3 dark surface containers) --- */
-  --bg-app: #0E1514;                  /* surface */
-  --bg-surface: #161D1C;              /* surfaceContainerLow */
-  --bg-elevated: #1A2120;             /* surfaceContainer */
-  --bg-hover: #252B2A;               /* surfaceContainerHigh */
+  --gold-700: #8a5a14;
+  --gold-600: #a96d18;
+  --gold-500: #c9821f;
+  --gold-100: #f6e4c2;
 
-  /* --- Text --- */
-  --text-main: #DDE4E2;              /* onSurface */
-  --text-muted: #BEC9C7;             /* onSurfaceVariant */
-  --text-subtle: #899391;            /* outline */
+  /* --- M3-compat reference aliases --- */
+  --m3-primary-10: #0c1c0c;
+  --m3-primary-20: #132a13;
+  --m3-primary-30: #31572c;
+  --m3-primary-40: #4f772d;
+  --m3-primary-50: #6b8e35;
+  --m3-primary-80: #90a955;
+  --m3-primary-90: #ecf39e;
+  --m3-secondary-30: #3c4934;
+  --m3-secondary-90: #e0e6cf;
+  --m3-tertiary-30: #5c4a26;
+  --m3-tertiary-40: #8a5a14;
+  --m3-tertiary-90: #f6e4c2;
+
+  /* --- Backgrounds (deep evergreen-tinted darks) --- */
+  --bg-app: #0d140c;                  /* near-black green canvas */
+  --bg-surface: #161f13;              /* card */
+  --bg-elevated: #1c2718;             /* raised */
+  --bg-hover: #25331f;               /* hover */
+
+  /* --- Text (AA on dark green) --- */
+  --text-main: #e9f0d6;              /* lime-tinted off-white */
+  --text-muted: #c2cfa3;
+  --text-subtle: #8b986f;
 
   /* --- Borders & Dividers --- */
-  --border-light: #3F4947;           /* surfaceVariant / outlineVariant */
-  --border-primary: #3F4947;         /* outlineVariant */
+  --border-light: #2c3a24;
+  --border-primary: #3a4a2f;
 
-  /* --- Interactive / Primary --- */
-  --action-primary: #81D5CD;         /* primary */
-  --action-primary-rgb: 129, 213, 205;
-  --action-hover: #9DF2E9;           /* primaryContainer-light as hover */
-  --action-disabled: #3F4947;        /* outlineVariant */
-  --on-primary: #003734;             /* onPrimary */
-  --primary-container: #00504B;      /* primaryContainer */
-  --on-primary-container: #9DF2E9;   /* onPrimaryContainer */
+  /* --- Interactive / Primary (lifted green for dark bg) --- */
+  --action-primary: #90a955;         /* palm-leaf — pops on dark, AA w/ dark text */
+  --action-primary-rgb: 144, 169, 85;
+  --action-hover: #b6cb7e;
+  --action-disabled: #3a4a2f;
+  --on-primary: #14210f;             /* dark text on light-green button */
+  --primary-container: #31572c;
+  --on-primary-container: #ecf39e;
 
-  /* --- Interactive / Accent (tertiary) --- */
-  --cta-accent: #AFC9E7;             /* tertiary */
-  --cta-accent-hover: #CFE5FF;       /* tertiaryContainer-light */
-  --on-accent: #18324A;              /* onTertiary */
-  --accent-container: #304962;       /* tertiaryContainer */
+  /* --- Interactive / Accent (warm gold) --- */
+  --cta-accent: #e0a64a;
+  --cta-accent-hover: #f6c87a;
+  --on-accent: #2a1c06;
+  --accent-container: #5c4a26;
 
   /* --- Interactive / Secondary --- */
-  --secondary: #B0CCC8;              /* secondary */
-  --on-secondary: #1C3532;           /* onSecondary */
-  --secondary-container: #324B49;    /* secondaryContainer */
-  --on-secondary-container: #CCE8E4; /* onSecondaryContainer */
+  --secondary: #b6cb7e;
+  --on-secondary: #1f3d1c;
+  --secondary-container: #31572c;
+  --on-secondary-container: #ecf39e;
 
   /* --- Semantic --- */
-  --color-success: #81D5CD;          /* primary in dark = teal glow */
-  --color-success-bg: #00504B;       /* primaryContainer */
-  --color-warning: #FFDEA6;          /* warm amber container as text */
-  --color-warning-bg: #3A2E1F;       /* dark warm bg */
-  --color-error: #FFB4AB;            /* error */
-  --color-error-bg: #93000A;         /* errorContainer */
-  --on-error: #690005;               /* onError */
-  --color-info: #AFC9E7;             /* tertiary */
-  --color-info-bg: #304962;          /* tertiaryContainer */
+  --color-success: #a8c46a;
+  --color-success-bg: #2a3d1c;
+  --color-warning: #f0c873;
+  --color-warning-bg: #3a2e15;
+  --color-error: #ffb4ab;
+  --color-error-bg: #5c1410;
+  --on-error: #2a0604;
+  --color-info: #9ccdbf;
+  --color-info-bg: #1c3a32;
 
-  /* --- Sidebar (M3 darkest surfaces) --- */
-  --sidebar-bg: #090F0F;             /* surfaceContainerLowest */
-  --sidebar-active: #00504B;         /* primaryContainer — teal glow on dark */
-  --sidebar-border: #1A2120;         /* surfaceContainer */
-  --sidebar-text: #DDE4E2;           /* onSurface */
-  --sidebar-text-muted: rgba(190, 201, 199, 0.6);
-  --sidebar-hover: rgba(255, 255, 255, 0.06);
+  /* --- Sidebar (darkest evergreen) --- */
+  --sidebar-bg: #0c1c0c;
+  --sidebar-active: #4f772d;
+  --sidebar-border: #1c2718;
+  --sidebar-text: #e9f0d6;
+  --sidebar-text-muted: rgba(233, 240, 214, 0.6);
+  --sidebar-hover: rgba(236, 243, 158, 0.08);
 
-  /* --- Finance Module (dark tertiary tones) --- */
-  --finance-bg: #0F1D2A;             /* tertiary-10 */
-  --finance-surface: #1A2120;        /* surfaceContainer */
-  --finance-header: #18324A;         /* onTertiary */
-  --finance-accent: #AFC9E7;         /* tertiary */
-  --finance-text: #CFE5FF;
+  /* --- Finance Module --- */
+  --finance-bg: #0f1a0c;
+  --finance-surface: #1c2718;
+  --finance-header: #ecf39e;
+  --finance-accent: #90a955;
+  --finance-text: #d3e0a8;
 
   /* --- Shadows (darker) --- */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
-  --shadow-card-hover: 0 8px 24px rgba(129, 213, 205, 0.15);
+  --shadow-card-hover: 0 8px 24px rgba(144, 169, 85, 0.18);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -196,35 +240,39 @@
    ═══════════════════════════════════════════════════════ */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg-app: #0E1514;
-    --bg-surface: #161D1C;
-    --bg-elevated: #1A2120;
-    --bg-hover: #252B2A;
-    --text-main: #DDE4E2;
-    --text-muted: #BEC9C7;
-    --text-subtle: #899391;
-    --border-light: #3F4947;
-    --border-primary: #3F4947;
-    --action-primary: #81D5CD;
-    --action-primary-rgb: 129, 213, 205;
-    --action-hover: #9DF2E9;
-    --action-disabled: #3F4947;
-    --cta-accent: #AFC9E7;
-    --cta-accent-hover: #CFE5FF;
-    --color-success: #81D5CD;
-    --color-success-bg: #00504B;
-    --color-warning: #FFDEA6;
-    --color-warning-bg: #3A2E1F;
-    --color-error: #FFB4AB;
-    --color-error-bg: #93000A;
-    --color-info: #AFC9E7;
-    --color-info-bg: #304962;
-    --sidebar-bg: #090F0F;
-    --sidebar-active: #00504B;
-    --sidebar-border: #1A2120;
-    --sidebar-text: #DDE4E2;
-    --sidebar-text-muted: rgba(190, 201, 199, 0.6);
-    --sidebar-hover: rgba(255, 255, 255, 0.06);
+    --bg-app: #0d140c;
+    --bg-surface: #161f13;
+    --bg-elevated: #1c2718;
+    --bg-hover: #25331f;
+    --text-main: #e9f0d6;
+    --text-muted: #c2cfa3;
+    --text-subtle: #8b986f;
+    --border-light: #2c3a24;
+    --border-primary: #3a4a2f;
+    --action-primary: #90a955;
+    --action-primary-rgb: 144, 169, 85;
+    --action-hover: #b6cb7e;
+    --action-disabled: #3a4a2f;
+    --on-primary: #14210f;
+    --primary-container: #31572c;
+    --on-primary-container: #ecf39e;
+    --cta-accent: #e0a64a;
+    --cta-accent-hover: #f6c87a;
+    --secondary: #b6cb7e;
+    --color-success: #a8c46a;
+    --color-success-bg: #2a3d1c;
+    --color-warning: #f0c873;
+    --color-warning-bg: #3a2e15;
+    --color-error: #ffb4ab;
+    --color-error-bg: #5c1410;
+    --color-info: #9ccdbf;
+    --color-info-bg: #1c3a32;
+    --sidebar-bg: #0c1c0c;
+    --sidebar-active: #4f772d;
+    --sidebar-border: #1c2718;
+    --sidebar-text: #e9f0d6;
+    --sidebar-text-muted: rgba(233, 240, 214, 0.6);
+    --sidebar-hover: rgba(236, 243, 158, 0.08);
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);

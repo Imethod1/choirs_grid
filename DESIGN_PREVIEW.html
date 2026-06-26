@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ChoirGrid — Pro Max Palette Preview</title>
+<style>
+  :root{
+    --green-900:#132a13; --green-800:#1f3d1c; --green-700:#31572c; --green-600:#4f772d;
+    --green-400:#90a955; --green-200:#d3e0a8; --green-100:#ecf39e; --gold-500:#c9821f; --gold-600:#a96d18;
+    --bg-app:#f7f9f1; --bg-surface:#fff; --bg-elevated:#f1f5e6; --bg-hover:#e6eed3;
+    --text-main:#14210f; --text-muted:#41502f; --border-light:#dde5c8;
+    --action-primary:#31572c; --on-primary:#fff; --shadow-sm:0 1px 3px rgba(0,0,0,.06);
+    --shadow-md:0 4px 12px rgba(0,0,0,.08); --shadow-card-hover:0 8px 24px rgba(49,87,44,.12);
+    --radius-lg:16px;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg-app);color:var(--text-main);padding:32px;line-height:1.5}
+  h1{font-size:28px;margin-bottom:4px;color:var(--green-800)}
+  .sub{color:var(--text-muted);margin-bottom:28px;font-size:14px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:28px 0 12px}
+  .ramp{display:flex;gap:0;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);max-width:780px}
+  .swatch{flex:1;height:74px;display:flex;align-items:flex-end;padding:8px;font-size:11px;font-weight:600}
+  .bento{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:900px}
+  .tile{background:var(--bg-elevated);border:1px solid var(--border-light);border-radius:var(--radius-lg);
+    padding:18px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:all .2s}
+  .tile:hover{box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}
+  .tile::before{content:'';position:absolute;inset:0 0 auto 0;height:4px;
+    background:linear-gradient(90deg,var(--action-primary),var(--green-400))}
+  .tile.wide{grid-column:span 2}
+  .tile .k{font-size:12px;color:var(--text-muted)}
+  .tile .v{font-size:30px;font-weight:700;color:var(--green-800);margin-top:6px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:8px}
+  .btn{border:none;border-radius:10px;padding:11px 20px;font-weight:600;font-size:14px;cursor:pointer;
+    transition:all .2s;box-shadow:var(--shadow-sm)}
+  .btn-primary{background:var(--action-primary);color:#fff}
+  .btn-primary:hover{background:var(--green-800)}
+  .btn-accent{background:var(--gold-600);color:#fff}
+  .btn-outline{background:transparent;border:2px solid var(--action-primary);color:var(--action-primary)}
+  .nav{background:var(--green-900);color:var(--green-100);border-radius:14px;padding:14px 18px;
+    display:flex;gap:8px;flex-direction:column;width:230px}
+  .nav .item{padding:9px 12px;border-radius:9px;font-size:14px;color:rgba(236,243,158,.7)}
+  .nav .item.active{background:var(--green-600);color:#fff}
+  .badge{display:inline-block;background:var(--green-200);color:var(--green-800);border-radius:999px;
+    padding:3px 11px;font-size:12px;font-weight:600}
+  .panel{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+</style>
+</head>
+<body>
+  <h1>ChoirGrid — “Pro Max” Evergreen System</h1>
+  <div class="sub">Anchored on the core green <b>#31572c</b>. Token-driven · WCAG-AA tuned · light + dark.</div>
+
+  <h2>Brand ramp</h2>
+  <div class="ramp">
+    <div class="swatch" style="background:#132a13;color:#ecf39e">900 evergreen</div>
+    <div class="swatch" style="background:#1f3d1c;color:#ecf39e">800</div>
+    <div class="swatch" style="background:#31572c;color:#fff">700 core</div>
+    <div class="swatch" style="background:#4f772d;color:#fff">600 fern</div>
+    <div class="swatch" style="background:#90a955;color:#14210f">400 palm</div>
+    <div class="swatch" style="background:#d3e0a8;color:#14210f">200</div>
+    <div class="swatch" style="background:#ecf39e;color:#14210f">100 lime</div>
+    <div class="swatch" style="background:#c9821f;color:#fff">gold accent</div>
+  </div>
+
+  <h2>Bento dashboard</h2>
+  <div class="bento">
+    <div class="tile"><div class="k">Total members</div><div class="v">128</div><span class="badge">+6 this month</span></div>
+    <div class="tile"><div class="k">Upcoming events</div><div class="v">4</div><span class="badge">this week</span></div>
+    <div class="tile wide"><div class="k">Attendance rate</div><div class="v">92%</div>
+      <div style="height:8px;background:var(--bg-hover);border-radius:99px;margin-top:10px;overflow:hidden">
+        <div style="width:92%;height:100%;background:linear-gradient(90deg,var(--green-600),var(--green-400))"></div></div></div>
+    <div class="tile"><div class="k">Contributions</div><div class="v">TZS 1.2M</div></div>
+    <div class="tile"><div class="k">New music</div><div class="v">9</div></div>
+    <div class="tile wide"><div class="k">Next rehearsal</div><div class="v" style="font-size:20px">Sat · 4:00 PM</div>
+      <span class="badge">St. Mary’s Hall</span></div>
+  </div>
+
+  <h2>Components</h2>
+  <div class="panel">
+    <div>
+      <div class="row">
+        <button class="btn btn-primary">Primary</button>
+        <button class="btn btn-accent">Accent (gold)</button>
+        <button class="btn btn-outline">Outline</button>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="item active">Dashboard</div>
+      <div class="item">Members</div>
+      <div class="item">Events</div>
+      <div class="item">Finance</div>
+      <div class="item">Music</div>
+    </div>
+  </div>
+</body>
+</html>

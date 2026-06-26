@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/utils/cn';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'elevated' | 'outline';
+  variant?: 'default' | 'elevated' | 'outline' | 'bento';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   hoverable?: boolean;
 }
@@ -10,9 +10,14 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = 'default', padding = 'md', hoverable = false, children, ...props }, ref) => {
     const variants = {
-      default: 'bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]',
-      elevated: 'bg-[var(--bg-elevated)] shadow-[var(--shadow-md)]',
+      default: 'bg-[var(--bg-surface)] border border-[var(--border-light)] shadow-[var(--shadow-sm)]',
+      elevated: 'bg-[var(--bg-surface)] border border-[var(--border-light)] shadow-[var(--shadow-md)]',
       outline: 'bg-[var(--bg-surface)] border border-[var(--border-light)]',
+      // Bento tile: subtle elevated surface with a soft tinted top edge for a premium feel.
+      bento:
+        'bg-[var(--bg-elevated)] border border-[var(--border-light)] shadow-[var(--shadow-sm)] ' +
+        'relative overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-1 ' +
+        'before:bg-gradient-to-r before:from-[var(--action-primary)] before:to-[var(--palm-leaf,var(--green-400))]',
     };
 
     const paddings = {
@@ -29,7 +34,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           'rounded-[var(--radius-lg)] transition-theme',
           variants[variant],
           paddings[padding],
-          hoverable && 'transition-shadow duration-200 hover:shadow-[var(--shadow-card-hover)] cursor-pointer',
+          hoverable &&
+            'transition-all duration-200 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 cursor-pointer',
           className
         )}
         {...props}

@@ -3,7 +3,7 @@ import { cn } from '@/utils/cn';
 import { Loader2 } from 'lucide-react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'accent';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   icon?: React.ReactNode;
@@ -32,9 +32,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        'bg-[var(--action-primary)] text-white hover:bg-[var(--action-hover)] focus:ring-[var(--action-primary)]',
+        'bg-[var(--action-primary)] text-[var(--on-primary)] shadow-[var(--shadow-sm)] hover:bg-[var(--action-hover)] hover:shadow-[var(--shadow-md)] focus:ring-[var(--action-primary)]',
       secondary:
-        'bg-[var(--cta-accent)] text-white hover:bg-[var(--cta-accent-hover)] focus:ring-[var(--cta-accent)]',
+        'bg-[var(--secondary)] text-[var(--on-secondary)] hover:opacity-90 focus:ring-[var(--secondary)]',
+      accent:
+        'bg-[var(--cta-accent)] text-[var(--on-accent)] shadow-[var(--shadow-sm)] hover:bg-[var(--cta-accent-hover)] focus:ring-[var(--cta-accent)]',
       outline:
         'border-2 border-[var(--action-primary)] text-[var(--action-primary)] hover:bg-[var(--bg-hover)] focus:ring-[var(--action-primary)]',
       ghost:
