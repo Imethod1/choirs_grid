@@ -5,37 +5,74 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useUIStore } from '@/store/ui.store';
 import { useToast } from '@/components/ui/Toast';
+import { useAuthStore } from '@/store/auth.store';
+import { membersService } from '@/services';
+import type { MemberWithUser } from '@/types/app.types';
+import type { MemberRole, VoicePart } from '@/types/database.types';
 
-const voiceParts = ['soprano', 'alto', 'tenor', 'bass'] as const;
-const roles = ['member', 'music_teacher', 'secretary', 'treasurer', 'assistant_leader'] as const;
+const voiceParts: VoicePart[] = ['soprano', 'alto', 'tenor', 'bass'];
+const roles: MemberRole[] = ['member', 'music_teacher', 'secretary', 'treasurer', 'assistant_leader'];
 
-export const AddMemberForm: React.FC = () => {
+interface AddMemberFormProps {
+  onCreated?: (member: MemberWithUser) => void;
+}
+
+function normalizeTanzaniaPhone(phone: string): string {
+  const compact = phone.replace(/\s/g, '');
+  if (compact.startsWith('+')) return compact;
+  return `+${compact}`;
+}
+
+export const AddMemberForm: React.FC<AddMemberFormProps> = ({ onCreated }) => {
   const { t } = useTranslation();
   const { closeBottomSheet } = useUIStore();
   const toast = useToast();
+  const { choir } = useAuthStore();
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
-  const [voicePart, setVoicePart] = useState<string>('soprano');
-  const [role, setRole] = useState<string>('member');
+  const [voicePart, setVoicePart] = useState<VoicePart>('soprano');
+  const [role, setRole] = useState<MemberRole>('member');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!choir?.id) {
+      toast.error(t('errors.unauthorized'));
+      return;
+    }
+
     if (!fullName.trim() || !phone) {
       toast.error(t('errors.validation'));
       return;
     }
-    if (!/^\+?255\d{9}$/.test(phone.replace(/\s/g, ''))) {
+
+    const normalizedPhone = normalizeTanzaniaPhone(phone);
+
+    if (!/^\+255\d{9}$/.test(normalizedPhone)) {
       toast.error(t('auth.invalid_phone'));
       return;
     }
 
     setIsLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    setIsLoading(false);
-    toast.success(t('common.done'));
-    closeBottomSheet();
+
+    try {
+      const member = await membersService.addMember(choir.id, {
+        phone: normalizedPhone,
+        fullName: fullName.trim(),
+        voicePart,
+        role,
+      });
+
+      toast.success(t('common.done'));
+      onCreated?.(member);
+      closeBottomSheet();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('errors.save_failed'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -63,7 +100,7 @@ export const AddMemberForm: React.FC = () => {
 
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-[var(--text-main)]">{t('roles.member')}</label>
-          <select value={role} onChange={e => setRole(e.target.value)} className="w-full rounded-[var(--radius-md)] border border-[var(--border-light)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] min-h-[var(--touch-target)]">
+          <select value={role} onChange={e => setRole(e.target.value as MemberRole)} className="w-full rounded-[var(--radius-md)] border border-[var(--border-light)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] min-h-[var(--touch-target)]">
             {roles.map(r => (
               <option key={r} value={r}>{t(`roles.${r}`)}</option>
             ))}

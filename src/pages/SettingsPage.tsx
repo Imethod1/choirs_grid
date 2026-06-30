@@ -1,29 +1,33 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
-  User, 
-  Shield, 
-  Smartphone, 
-  Globe, 
-  Moon, 
+import {
+  User,
+  Shield,
+  Smartphone,
+  Globe,
+  Moon,
   Sun,
   Bell,
   Wifi,
   LogOut,
   ChevronRight,
   Info,
-  Monitor
+  Monitor,
+  Building2
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { useUIStore } from '@/store/ui.store';
 import { useAuthStore } from '@/store/auth.store';
+import { ChoirProfileForm } from '@/components/forms/ChoirProfileForm';
 
 const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme, language, setLanguage, lowDataMode, setLowDataMode } = useUIStore();
-  const { user, choirMember, logout } = useAuthStore();
+  const { theme, setTheme, language, setLanguage, lowDataMode, setLowDataMode, openBottomSheet } = useUIStore();
+  const { user, choir, choirMember, hasAnyRole, logout } = useAuthStore();
+
+  const canManageChoir = hasAnyRole(['super_admin', 'choir_leader']);
 
   const handleLanguageChange = () => {
     const newLang = language === 'en' ? 'sw' : 'en';
@@ -50,27 +54,48 @@ const SettingsPage: React.FC = () => {
     return 'Light';
   };
 
+  const openChoirProfile = () => {
+    openBottomSheet(<ChoirProfileForm />);
+  };
+
   return (
     <div className="p-4 lg:p-6 space-y-6 max-w-2xl mx-auto">
-      {/* Profile card */}
       <Card>
         <div className="flex items-center gap-4">
           <Avatar name={user?.full_name || 'User'} size="xl" />
-          <div className="flex-1">
-            <h2 className="text-xl font-bold text-[var(--text-main)]">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl font-bold text-[var(--text-main)] truncate">
               {user?.full_name}
             </h2>
             <p className="text-sm text-[var(--text-muted)]">{user?.phone}</p>
             <div className="mt-2">
-              <Badge variant="accent">
-                {t(`roles.${choirMember?.role}`)}
-              </Badge>
+              {choirMember?.role && (
+                <Badge variant="accent">
+                  {t(`roles.${choirMember.role}`)}
+                </Badge>
+              )}
             </div>
           </div>
         </div>
       </Card>
 
-      {/* Profile section */}
+      {canManageChoir && choir && (
+        <div>
+          <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3 px-1">
+            Choir Management
+          </h3>
+          <Card padding="none" className="divide-y divide-[var(--border-light)]">
+            <SettingRow
+              icon={Building2}
+              label="Choir Profile"
+              description={`${choir.name} • ${choir.parish}`}
+              value={choir.dues_currency}
+              onClick={openChoirProfile}
+            />
+          </Card>
+        </div>
+      )}
+
       <div>
         <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3 px-1">
           {t('settings.profile')}
@@ -82,7 +107,6 @@ const SettingsPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Preferences section */}
       <div>
         <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3 px-1">
           Preferences
@@ -111,7 +135,6 @@ const SettingsPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* About section */}
       <div>
         <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3 px-1">
           {t('settings.about')}
@@ -121,7 +144,6 @@ const SettingsPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Logout button */}
       <Card padding="none">
         <button
           onClick={logout}
@@ -139,23 +161,27 @@ const SettingsPage: React.FC = () => {
   );
 };
 
-// Setting row component
 interface SettingRowProps {
   icon: React.FC<{ className?: string }>;
   label: string;
   description?: string;
   value?: string;
+  onClick?: () => void;
 }
 
-const SettingRow: React.FC<SettingRowProps> = ({ icon: Icon, label, description, value }) => (
-  <button className="flex items-center gap-4 p-4 w-full hover:bg-[var(--bg-hover)] transition-colors">
+const SettingRow: React.FC<SettingRowProps> = ({ icon: Icon, label, description, value, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="flex items-center gap-4 p-4 w-full hover:bg-[var(--bg-hover)] transition-colors"
+  >
     <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-[var(--bg-hover)]">
       <Icon className="h-5 w-5 text-[var(--text-muted)]" />
     </div>
-    <div className="flex-1 text-left">
+    <div className="flex-1 text-left min-w-0">
       <p className="font-medium text-[var(--text-main)]">{label}</p>
       {description && (
-        <p className="text-xs text-[var(--text-muted)]">{description}</p>
+        <p className="text-xs text-[var(--text-muted)] truncate">{description}</p>
       )}
     </div>
     {value && <span className="text-sm text-[var(--text-muted)]">{value}</span>}
@@ -163,7 +189,6 @@ const SettingRow: React.FC<SettingRowProps> = ({ icon: Icon, label, description,
   </button>
 );
 
-// Setting toggle component
 interface SettingToggleProps {
   icon: React.FC<{ className?: string }>;
   label: string;
@@ -173,6 +198,7 @@ interface SettingToggleProps {
 
 const SettingToggle: React.FC<SettingToggleProps> = ({ icon: Icon, label, value, onClick }) => (
   <button
+    type="button"
     onClick={onClick}
     className="flex items-center gap-4 p-4 w-full hover:bg-[var(--bg-hover)] transition-colors"
   >
@@ -187,7 +213,6 @@ const SettingToggle: React.FC<SettingToggleProps> = ({ icon: Icon, label, value,
   </button>
 );
 
-// Setting switch component
 interface SettingSwitchProps {
   icon: React.FC<{ className?: string }>;
   label: string;

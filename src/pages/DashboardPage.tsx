@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { 
-  Users, 
-  Calendar, 
-  TrendingUp, 
+import {
+  Users,
+  Calendar,
+  TrendingUp,
   ChevronRight,
   Music,
   Clock,
@@ -13,21 +13,68 @@ import {
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar, AvatarGroup } from '@/components/ui/Avatar';
+import { Button } from '@/components/ui/Button';
+import { SkeletonCard } from '@/components/ui/Skeleton';
 import { useAuthStore } from '@/store/auth.store';
-import { mockDashboardStats, mockMembersWithUsers, mockEvents } from '@/lib/mock-data';
+import { eventsService, membersService } from '@/services';
 import { format } from 'date-fns';
+import type { Event } from '@/types/database.types';
+import type { MemberWithUser } from '@/types/app.types';
 
 const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const { user, choir } = useAuthStore();
-  const stats = mockDashboardStats;
+
+  const [members, setMembers] = useState<MemberWithUser[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [attendanceRate, setAttendanceRate] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadDashboard = async () => {
+    if (!choir?.id) {
+      setIsLoading(false);
+      setMembers([]);
+      setUpcomingEvents([]);
+      setAttendanceRate(0);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [membersData, eventsData, rate] = await Promise.all([
+        membersService.getMembers(choir.id),
+        eventsService.getUpcomingEvents(choir.id, 3),
+        eventsService.getAttendanceRate(choir.id),
+      ]);
+
+      setMembers(membersData);
+      setUpcomingEvents(eventsData);
+      setAttendanceRate(rate);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.server'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [choir?.id]);
+
+  const activeMembers = useMemo(
+    () => members.filter((member) => member.status === 'active' || member.status === 'probation').length,
+    [members]
+  );
 
   const statCards = [
     {
       key: 'members',
       label: t('dashboard.total_members'),
-      value: stats.totalMembers,
-      subtitle: `${stats.activeMembers} ${t('dashboard.active_members')}`,
+      value: members.length,
+      subtitle: `${activeMembers} ${t('dashboard.active_members')}`,
       icon: Users,
       color: 'bg-[var(--primary-container)] text-[var(--on-primary-container)]',
       link: '/members',
@@ -35,7 +82,7 @@ const DashboardPage: React.FC = () => {
     {
       key: 'events',
       label: t('dashboard.upcoming_events'),
-      value: stats.upcomingEvents.length,
+      value: upcomingEvents.length,
       subtitle: t('dashboard.this_week'),
       icon: Calendar,
       color: 'bg-[var(--secondary-container)] text-[var(--on-secondary-container)]',
@@ -44,13 +91,30 @@ const DashboardPage: React.FC = () => {
     {
       key: 'attendance',
       label: t('dashboard.attendance_rate'),
-      value: `${stats.attendanceRate}%`,
-      subtitle: t('attendance.attendance_rate', { rate: stats.attendanceRate }),
+      value: `${attendanceRate}%`,
+      subtitle: t('attendance.attendance_rate', { rate: attendanceRate }),
       icon: TrendingUp,
       color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
       link: '/events',
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="p-4 lg:p-6 space-y-6 max-w-6xl mx-auto">
+        <SkeletonCard />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 lg:p-6 space-y-6 max-w-6xl mx-auto">
@@ -61,13 +125,22 @@ const DashboardPage: React.FC = () => {
             {t('dashboard.welcome', { name: user?.display_name || user?.full_name })}
           </h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            {choir?.name} • {choir?.parish}
+            {choir ? `${choir.name} • ${choir.parish}` : t('errors.no_permission')}
           </p>
         </div>
         <Avatar name={user?.full_name || ''} size="lg" />
       </div>
 
-      {/* Stats grid — Bento tiles with staggered entrance (UI/UX #7 + #33) */}
+      {error && (
+        <Card>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-[var(--color-error)]">{error}</p>
+            <Button size="sm" variant="outline" onClick={loadDashboard}>{t('common.retry')}</Button>
+          </div>
+        </Card>
+      )}
+
+      {/* Stats grid — real Supabase data */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {statCards.map((stat, i) => {
           const Icon = stat.icon;
@@ -96,8 +169,8 @@ const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upcoming events */}
         <Card>
-          <CardHeader 
-            title={t('dashboard.upcoming_events')} 
+          <CardHeader
+            title={t('dashboard.upcoming_events')}
             action={
               <Link to="/events" className="text-sm text-[var(--action-primary)] font-medium flex items-center gap-1">
                 {t('common.view_all')} <ChevronRight className="h-4 w-4" />
@@ -105,9 +178,10 @@ const DashboardPage: React.FC = () => {
             }
           />
           <div className="space-y-3">
-            {mockEvents.slice(0, 3).map((event) => (
-              <div 
-                key={event.id} 
+            {upcomingEvents.map((event) => (
+              <Link
+                to="/events"
+                key={event.id}
                 className="flex items-start gap-4 p-3 rounded-lg hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
               >
                 <div className="flex flex-col items-center justify-center min-w-[48px] h-12 rounded-lg bg-[var(--primary-container)]">
@@ -138,9 +212,9 @@ const DashboardPage: React.FC = () => {
                 <Badge variant={event.event_type === 'rehearsal' ? 'default' : 'accent'} size="sm">
                   {t(`events.${event.event_type}`)}
                 </Badge>
-              </div>
+              </Link>
             ))}
-            {mockEvents.length === 0 && (
+            {upcomingEvents.length === 0 && (
               <div className="text-center py-6 text-[var(--text-muted)]">
                 <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p>{t('dashboard.no_upcoming')}</p>
@@ -155,7 +229,7 @@ const DashboardPage: React.FC = () => {
           <Card>
             <CardHeader title={t('dashboard.quick_actions')} />
             <div className="grid grid-cols-2 gap-3">
-              <Link 
+              <Link
                 to="/events"
                 className="flex items-center gap-3 p-3 rounded-lg bg-[var(--primary-container)] hover:bg-[var(--primary-container)]/80 transition-colors"
               >
@@ -164,7 +238,7 @@ const DashboardPage: React.FC = () => {
                   {t('attendance.mark_attendance')}
                 </span>
               </Link>
-              <Link 
+              <Link
                 to="/music"
                 className="flex items-center gap-3 p-3 rounded-lg bg-[var(--cta-accent)]/10 hover:bg-[var(--cta-accent)]/20 transition-colors"
               >
@@ -178,7 +252,7 @@ const DashboardPage: React.FC = () => {
 
           {/* Recent members */}
           <Card>
-            <CardHeader 
+            <CardHeader
               title={t('members.title')}
               action={
                 <Link to="/members" className="text-sm text-[var(--action-primary)] font-medium flex items-center gap-1">
@@ -187,16 +261,16 @@ const DashboardPage: React.FC = () => {
               }
             />
             <div className="flex items-center justify-between">
-              <AvatarGroup 
-                users={mockMembersWithUsers.slice(0, 6).map(m => ({ 
-                  name: m.user.full_name, 
-                  src: m.user.photo_url 
-                }))} 
+              <AvatarGroup
+                users={members.slice(0, 6).map(m => ({
+                  name: m.user.full_name,
+                  src: m.user.photo_url
+                }))}
                 max={5}
                 size="md"
               />
               <span className="text-sm text-[var(--text-muted)]">
-                +{mockMembersWithUsers.length} {t('members.all_members').toLowerCase()}
+                +{members.length} {t('members.all_members').toLowerCase()}
               </span>
             </div>
           </Card>

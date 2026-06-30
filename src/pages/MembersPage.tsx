@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, UserPlus, ChevronRight, Phone, Mail } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
@@ -12,22 +12,50 @@ import { useUIStore } from '@/store/ui.store';
 import { useAuthStore } from '@/store/auth.store';
 import { PII_ROLES, LEADERSHIP_ROLES } from '@/lib/rbac';
 import { AddMemberForm } from '@/components/forms/AddMemberForm';
-import { mockMembersWithUsers } from '@/lib/mock-data';
+import { membersService } from '@/services';
 import type { MemberWithUser } from '@/types/app.types';
 import type { VoicePart, MemberStatus } from '@/types/database.types';
 
 const MembersPage: React.FC = () => {
   const { t } = useTranslation();
   const { openBottomSheet } = useUIStore();
-  const { hasAnyRole } = useAuthStore();
+  const { hasAnyRole, choir } = useAuthStore();
+
   const canViewPhone = hasAnyRole(PII_ROLES);
-  
+  const canManageMembers = hasAnyRole(LEADERSHIP_ROLES);
+
+  const [members, setMembers] = useState<MemberWithUser[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [voiceFilter, setVoiceFilter] = useState<VoicePart | 'all'>('all');
   const [statusFilter] = useState<MemberStatus | 'all'>('all');
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Voice part filter options
+  const loadMembers = async () => {
+    if (!choir?.id) {
+      setMembers([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await membersService.getMembers(choir.id);
+      setMembers(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.server'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [choir?.id]);
+
   const voiceParts: Array<{ value: VoicePart | 'all'; label: string }> = [
     { value: 'all', label: t('members.all_members') },
     { value: 'soprano', label: t('voice_parts.soprano') },
@@ -36,32 +64,32 @@ const MembersPage: React.FC = () => {
     { value: 'bass', label: t('voice_parts.bass') },
   ];
 
-  // Filter members
   const filteredMembers = useMemo(() => {
-    return mockMembersWithUsers.filter((member) => {
+    return members.filter((member) => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesName = member.user.full_name.toLowerCase().includes(query);
         const matchesVoice = member.voice_part?.toLowerCase().includes(query);
-        if (!matchesName && !matchesVoice) return false;
+        const matchesRole = member.role.toLowerCase().includes(query);
+
+        if (!matchesName && !matchesVoice && !matchesRole) return false;
       }
-      
+
       if (voiceFilter !== 'all' && member.voice_part !== voiceFilter) {
         return false;
       }
-      
+
       if (statusFilter !== 'all' && member.status !== statusFilter) {
         return false;
       }
-      
+
       return true;
     });
-  }, [searchQuery, voiceFilter, statusFilter]);
+  }, [members, searchQuery, voiceFilter, statusFilter]);
 
-  // Group members by voice part
   const groupedMembers = useMemo(() => {
     if (voiceFilter !== 'all') return { [voiceFilter]: filteredMembers };
-    
+
     const groups: Record<string, MemberWithUser[]> = {};
     filteredMembers.forEach((member) => {
       const part = member.voice_part || 'other';
@@ -73,6 +101,16 @@ const MembersPage: React.FC = () => {
 
   const handleMemberClick = (member: MemberWithUser) => {
     openBottomSheet(<MemberDetailSheet member={member} canViewPhone={canViewPhone} />);
+  };
+
+  const openAddMemberForm = () => {
+    openBottomSheet(
+      <AddMemberForm
+        onCreated={(member) => {
+          setMembers((current) => [...current, member]);
+        }}
+      />
+    );
   };
 
   return (
@@ -87,12 +125,21 @@ const MembersPage: React.FC = () => {
             {filteredMembers.length} {t('members.title').toLowerCase()}
           </p>
         </div>
-        {hasAnyRole(LEADERSHIP_ROLES) && (
-          <Button size="sm" icon={<UserPlus className="h-4 w-4" />} onClick={() => openBottomSheet(<AddMemberForm />)}>
+        {canManageMembers && (
+          <Button size="sm" icon={<UserPlus className="h-4 w-4" />} onClick={openAddMemberForm}>
             {t('members.add_member')}
           </Button>
         )}
       </div>
+
+      {error && (
+        <Card>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-[var(--color-error)]">{error}</p>
+            <Button size="sm" variant="outline" onClick={loadMembers}>{t('common.retry')}</Button>
+          </div>
+        </Card>
+      )}
 
       {/* Search and filters */}
       <div className="space-y-3">
@@ -102,7 +149,7 @@ const MembersPage: React.FC = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           icon={<Search className="h-4 w-4" />}
         />
-        
+
         {/* Voice part filter chips */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
           {voiceParts.map((part) => (
@@ -163,7 +210,7 @@ const MembersPage: React.FC = () => {
                         )}
                       </div>
                       <p className="text-sm text-[var(--text-muted)] truncate">
-                        {t(`voice_parts.${member.voice_part}`)}
+                        {member.voice_part ? t(`voice_parts.${member.voice_part}`) : t('common.not_found')}
                       </p>
                     </div>
                     <StatusBadge status={member.status} />
@@ -199,7 +246,7 @@ const MemberDetailSheet: React.FC<MemberDetailSheetProps> = ({ member, canViewPh
             {member.user.full_name}
           </h2>
           <p className="text-sm text-[var(--text-muted)]">
-            {t(`voice_parts.${member.voice_part}`)} • {t(`roles.${member.role}`)}
+            {member.voice_part ? t(`voice_parts.${member.voice_part}`) : t('common.not_found')} • {t(`roles.${member.role}`)}
           </p>
           <div className="mt-2">
             <StatusBadge status={member.status} />
@@ -225,7 +272,7 @@ const MemberDetailSheet: React.FC<MemberDetailSheetProps> = ({ member, canViewPh
             </div>
           </a>
         )}
-        
+
         {member.user.email && (
           <a
             href={`mailto:${member.user.email}`}
@@ -247,11 +294,11 @@ const MemberDetailSheet: React.FC<MemberDetailSheetProps> = ({ member, canViewPh
       {/* Member since */}
       {member.joined_at && (
         <p className="text-sm text-[var(--text-muted)] text-center">
-          {t('members.member_since', { 
-            date: new Date(member.joined_at).toLocaleDateString('en-US', { 
-              month: 'long', 
-              year: 'numeric' 
-            }) 
+          {t('members.member_since', {
+            date: new Date(member.joined_at).toLocaleDateString('en-US', {
+              month: 'long',
+              year: 'numeric'
+            })
           })}
         </p>
       )}
@@ -261,7 +308,7 @@ const MemberDetailSheet: React.FC<MemberDetailSheetProps> = ({ member, canViewPh
         <Button variant="outline" fullWidth onClick={closeBottomSheet}>
           {t('common.cancel')}
         </Button>
-        <Button variant="primary" fullWidth>
+        <Button variant="primary" fullWidth onClick={closeBottomSheet}>
           {t('members.profile')}
         </Button>
       </div>

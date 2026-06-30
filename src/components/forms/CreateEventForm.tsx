@@ -5,33 +5,69 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useUIStore } from '@/store/ui.store';
 import { useToast } from '@/components/ui/Toast';
+import { useAuthStore } from '@/store/auth.store';
+import { eventsService } from '@/services';
+import type { Event, EventType } from '@/types/database.types';
 
-const eventTypes = ['rehearsal', 'mass', 'wedding', 'funeral', 'concert', 'meeting', 'other'] as const;
+const eventTypes: EventType[] = ['rehearsal', 'mass', 'wedding', 'funeral', 'concert', 'meeting', 'other'];
 
-export const CreateEventForm: React.FC = () => {
+interface CreateEventFormProps {
+  onCreated?: (event: Event) => void;
+}
+
+export const CreateEventForm: React.FC<CreateEventFormProps> = ({ onCreated }) => {
   const { t } = useTranslation();
   const { closeBottomSheet } = useUIStore();
   const toast = useToast();
+  const { user, choir } = useAuthStore();
 
   const [title, setTitle] = useState('');
-  const [eventType, setEventType] = useState<string>('rehearsal');
+  const [eventType, setEventType] = useState<EventType>('rehearsal');
   const [location, setLocation] = useState('');
+  const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !date) {
+
+    if (!choir?.id || !user?.id) {
+      toast.error(t('errors.unauthorized'));
+      return;
+    }
+
+    if (!title.trim() || !date || !time) {
+      toast.error(t('errors.validation'));
+      return;
+    }
+
+    const startsAt = new Date(`${date}T${time}`);
+    if (Number.isNaN(startsAt.getTime())) {
       toast.error(t('errors.validation'));
       return;
     }
 
     setIsLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    setIsLoading(false);
-    toast.success(t('common.done'));
-    closeBottomSheet();
+    try {
+      const event = await eventsService.createEvent({
+        choirId: choir.id,
+        title,
+        eventType,
+        startsAt: startsAt.toISOString(),
+        location,
+        description,
+        createdBy: user.id,
+      });
+
+      toast.success(t('common.done'));
+      onCreated?.(event);
+      closeBottomSheet();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('errors.save_failed'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -59,6 +95,8 @@ export const CreateEventForm: React.FC = () => {
         </div>
 
         <Input label={t('events.location')} value={location} onChange={e => setLocation(e.target.value)} icon={<MapPin className="h-4 w-4" />} placeholder="St. Joseph's Parish Hall" />
+        <Input label={t('common.description')} value={description} onChange={e => setDescription(e.target.value)} placeholder="Optional notes" />
+
         <div className="grid grid-cols-2 gap-3">
           <Input label={t('finance.date')} type="date" value={date} onChange={e => setDate(e.target.value)} icon={<Calendar className="h-4 w-4" />} />
           <Input label={t('events.starts_at')} type="time" value={time} onChange={e => setTime(e.target.value)} icon={<Clock className="h-4 w-4" />} />

@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { 
-  Calendar, 
-  Plus, 
-  Clock, 
-  MapPin, 
-  ChevronLeft, 
+import {
+  Calendar,
+  Plus,
+  Clock,
+  MapPin,
+  ChevronLeft,
   ChevronRight,
   Check,
   X,
@@ -16,47 +16,78 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { SkeletonCard } from '@/components/ui/Skeleton';
 import { useUIStore } from '@/store/ui.store';
 import { useAuthStore } from '@/store/auth.store';
 import { LEADERSHIP_ROLES } from '@/lib/rbac';
 import { CreateEventForm } from '@/components/forms/CreateEventForm';
-import { mockEvents } from '@/lib/mock-data';
+import { eventsService } from '@/services';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, isToday } from 'date-fns';
 import type { Event } from '@/types/database.types';
 
 const EventsPage: React.FC = () => {
   const { t } = useTranslation();
   const { openBottomSheet } = useUIStore();
-  const { hasAnyRole } = useAuthStore();
+  const { hasAnyRole, choir } = useAuthStore();
   const canCreateEvent = hasAnyRole(LEADERSHIP_ROLES);
-  
+
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadEvents = async () => {
+    if (!choir?.id) {
+      setEvents([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await eventsService.getEvents(choir.id);
+      setEvents(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.server'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [choir?.id]);
 
   const calendarDays = useMemo(() => {
     const start = startOfMonth(currentMonth);
     const end = endOfMonth(currentMonth);
     const days = eachDayOfInterval({ start, end });
     const startDay = start.getDay();
-    const paddedDays: (Date | null)[] = Array(startDay).fill(null).concat(days);
-    return paddedDays;
+    return Array<Date | null>(startDay).fill(null).concat(days);
   }, [currentMonth]);
 
   const getEventsForDate = (date: Date) => {
-    return mockEvents.filter((event) => isSameDay(new Date(event.starts_at), date));
+    return events.filter((event) => isSameDay(new Date(event.starts_at), date));
   };
 
   const upcomingEvents = useMemo(() => {
-    return mockEvents
+    return events
       .filter((event) => new Date(event.starts_at) >= new Date())
       .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
-  }, []);
+  }, [events]);
 
   const selectedDateEvents = selectedDate ? getEventsForDate(selectedDate) : [];
 
   const handleEventClick = (event: Event) => {
     openBottomSheet(<EventDetailSheet event={event} />);
+  };
+
+  const openCreateEventForm = () => {
+    openBottomSheet(<CreateEventForm onCreated={(event) => setEvents((current) => [...current, event])} />);
   };
 
   const eventTypeColors: Record<string, string> = {
@@ -68,6 +99,15 @@ const EventsPage: React.FC = () => {
     meeting: 'bg-[var(--cta-accent)]',
     other: 'bg-[var(--text-subtle)]',
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-4 lg:p-6 space-y-4 max-w-4xl mx-auto">
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 lg:p-6 space-y-4 max-w-4xl mx-auto">
@@ -83,12 +123,21 @@ const EventsPage: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           {canCreateEvent && (
-            <Button size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => openBottomSheet(<CreateEventForm />)}>
+            <Button size="sm" icon={<Plus className="h-4 w-4" />} onClick={openCreateEventForm}>
               {t('events.create_event')}
             </Button>
           )}
         </div>
       </div>
+
+      {error && (
+        <Card>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-[var(--color-error)]">{error}</p>
+            <Button size="sm" variant="outline" onClick={loadEvents}>{t('common.retry')}</Button>
+          </div>
+        </Card>
+      )}
 
       {/* View toggle */}
       <div className="flex gap-2 p-1 bg-[var(--bg-hover)] rounded-lg w-fit">
@@ -146,11 +195,11 @@ const EventsPage: React.FC = () => {
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((day, index) => {
                 if (!day) return <div key={`empty-${index}`} className="aspect-square" />;
-                
+
                 const dayEvents = getEventsForDate(day);
                 const isSelected = selectedDate && isSameDay(day, selectedDate);
                 const isCurrentMonth = isSameMonth(day, currentMonth);
-                
+
                 return (
                   <button
                     key={day.toISOString()}
@@ -174,7 +223,7 @@ const EventsPage: React.FC = () => {
                           <span
                             key={event.id}
                             className={`h-1.5 w-1.5 rounded-full ${
-                              isSelected ? 'bg-white' : eventTypeColors[event.event_type]
+                              isSelected ? 'bg-white' : eventTypeColors[event.event_type] ?? eventTypeColors.other
                             }`}
                           />
                         ))}
@@ -214,7 +263,7 @@ const EventsPage: React.FC = () => {
               icon="events"
               title={t('events.no_events')}
               description={t('empty.events')}
-              action={canCreateEvent ? { label: t('events.create_event'), onClick: () => {} } : undefined}
+              action={canCreateEvent ? { label: t('events.create_event'), onClick: openCreateEventForm } : undefined}
             />
           )}
         </div>
@@ -230,7 +279,7 @@ interface EventCardProps {
 
 const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
   const { t } = useTranslation();
-  
+
   const eventTypeBorders: Record<string, string> = {
     rehearsal: 'border-l-[var(--action-primary)]',
     mass: 'border-l-[var(--cta-accent)]',
@@ -245,16 +294,16 @@ const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
     <Card
       hoverable
       padding="none"
-      className={`border-l-4 ${eventTypeBorders[event.event_type]} cursor-pointer`}
+      className={`border-l-4 ${eventTypeBorders[event.event_type] ?? eventTypeBorders.other} cursor-pointer`}
       onClick={onClick}
     >
       <div className="p-4">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <h4 className="font-semibold text-[var(--text-main)]">
               {event.title}
             </h4>
-            <div className="flex items-center gap-3 mt-2 text-sm text-[var(--text-muted)]">
+            <div className="flex items-center gap-3 mt-2 text-sm text-[var(--text-muted)] flex-wrap">
               <span className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
                 {format(new Date(event.starts_at), 'h:mm a')}
@@ -297,7 +346,7 @@ const EventDetailSheet: React.FC<EventDetailSheetProps> = ({ event }) => {
       <Badge variant="accent" className="mb-3">
         {t(`events.${event.event_type}`)}
       </Badge>
-      
+
       <h2 className="text-xl font-bold text-[var(--text-main)] mb-4">
         {event.title}
       </h2>

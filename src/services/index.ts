@@ -9,6 +9,7 @@
 import { getService } from '@/lib/service-factory';
 
 import * as authReal from './auth.service';
+import * as choirReal from './choir.service';
 import * as authMock from './mock/auth.mock';
 
 import * as membersReal from './members.service';
@@ -16,6 +17,9 @@ import * as membersMock from './mock/members.mock';
 
 import * as attendanceReal from './attendance.service';
 import * as attendanceMock from './mock/attendance.mock';
+
+import * as eventsReal from './events.service';
+import * as eventsMock from './mock/events.mock';
 
 import * as financeReal from './finance.service';
 import * as financeMock from './mock/finance.mock';
@@ -32,9 +36,11 @@ import * as governanceMock from './mock/governance.mock';
 import * as auditReal from './audit.service';
 import * as auditMock from './mock/audit.mock';
 
+export const choirService = getService(choirReal, choirReal);
 export const authService = getService(authReal, authMock);
 export const membersService = getService(membersReal, membersMock);
 export const attendanceService = getService(attendanceReal, attendanceMock);
+export const eventsService = getService(eventsReal, eventsMock);
 export const financeService = getService(financeReal, financeMock);
 export const communicationService = getService(communicationReal, communicationMock);
 export const musicService = getService(musicReal, musicMock);
